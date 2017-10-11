@@ -14,6 +14,7 @@ public slots:
     void setHashrate(int hashrate);
     void addBlock();
     void pause();
+    void setGraphZoom(int zoom);
 
 protected:
     void paintEvent(QPaintEvent *event);
@@ -25,7 +26,7 @@ private:
     QPolygonF m_blocksFoundGraph;
     qint64 m_startTime;
     qint64 m_pauseStart;
-    int m_pixelsPerSecond;
+    float m_pixelsPerSecond;
 
     qint64 m_unitStartTime;
     int m_blocksFoundThisUnit;

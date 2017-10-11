@@ -2,6 +2,8 @@
 #include "minerwidget.h"
 #include "ui_mainwindow.h"
 
+#include <QSlider>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -14,12 +16,15 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionNew_Miner, SIGNAL(triggered(bool)), this, SLOT(addMiner()));
     connect (ui->action_Quit, SIGNAL(triggered(bool)), QGuiApplication::instance(), SLOT(quit()));
     connect (ui->action_Pause, SIGNAL(triggered(bool)), &m_chain, SLOT(pause()));
+    connect (ui->action_Pause, SIGNAL(triggered(bool)), ui->graphsFrame, SLOT(pause()));
     connect (&m_chain, SIGNAL(newBlock(int)), this, SLOT(newBlockFound(int)));
     connect (&m_chain, SIGNAL(difficultyChanged(int)), ui->graphsFrame, SLOT(setDifficulty(int)));
     connect (&m_chain, SIGNAL(hashpowerChanged(int)), ui->graphsFrame, SLOT(setHashrate(int)));
     connect (&m_chain, SIGNAL(newBlock(int)), ui->graphsFrame, SLOT(addBlock()));
     ui->graphsFrame->setDifficulty(m_chain.difficulty());
     setStatusBar(nullptr);
+
+    connect (ui->zoomLevel, SIGNAL(valueChanged(int)), ui->graphsFrame, SLOT(setGraphZoom(int)));
 
     addMiner();
 }

@@ -11,43 +11,27 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Difficulty Simulator</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
-     <widget class="QScrollArea" name="scrollArea">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="1" column="0">
+     <widget class="QSlider" name="zoomLevel">
+      <property name="minimum">
+       <number>1</number>
       </property>
-      <property name="minimumSize">
-       <size>
-        <width>150</width>
-        <height>0</height>
-       </size>
+      <property name="maximum">
+       <number>60</number>
       </property>
-      <property name="focusPolicy">
-       <enum>Qt::NoFocus</enum>
+      <property name="value">
+       <number>5</number>
       </property>
-      <property name="widgetResizable">
-       <bool>true</bool>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
       </property>
-      <widget class="QWidget" name="minersForm">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>711</width>
-         <height>68</height>
-        </rect>
-       </property>
-      </widget>
      </widget>
     </item>
-    <item>
+    <item row="1" column="1">
      <widget class="QGroupBox" name="box">
       <property name="title">
        <string>Blockchain Graphs</string>
@@ -92,6 +76,38 @@
         </layout>
        </item>
       </layout>
+     </widget>
+    </item>
+    <item row="0" column="0" colspan="2">
+     <widget class="QScrollArea" name="scrollArea">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>150</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::NoFocus</enum>
+      </property>
+      <property name="widgetResizable">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="minersForm">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>715</width>
+         <height>80</height>
+        </rect>
+       </property>
+      </widget>
      </widget>
     </item>
    </layout>

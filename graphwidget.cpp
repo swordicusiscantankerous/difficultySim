@@ -40,12 +40,13 @@ void GraphWidget::setHashrate(int hashrate)
 
 void GraphWidget::addBlock()
 {
+    if (m_pauseStart != 0)
+        return;
     const int UnitTime = 1000;
     const qint64 now = QDateTime::currentMSecsSinceEpoch();
     if (now - m_unitStartTime > UnitTime) {// start new unit
         const qint64 relativeTime = now - m_startTime;
         m_blocksFoundGraph.append(QPointF(relativeTime / 500, m_blocksFoundThisUnit));
-        qDebug() << m_blocksFoundThisUnit;
         m_blocksFoundThisUnit = 1;
         m_unitStartTime = now;
     } else {
@@ -61,9 +62,15 @@ void GraphWidget::pause()
         m_repaintTimer->stop();
     } else {
         m_startTime += now - m_pauseStart;
+        m_unitStartTime += now - m_pauseStart;
         m_pauseStart = 0;
         m_repaintTimer->start();
     }
+}
+
+void GraphWidget::setGraphZoom(int zoom)
+{
+    m_pixelsPerSecond = 25. / zoom;
 }
 
 void GraphWidget::paintEvent(QPaintEvent *)
@@ -118,13 +125,13 @@ void GraphWidget::paintEvent(QPaintEvent *)
         painter.drawPolyline(m2.map(graph));
     }
     if (!m_blocksFoundGraph.isEmpty()) {
-        painter.setPen(Qt::NoPen);
-        painter.setBrush(QColor(255, 226, 76, 170));
+        painter.setPen(QColor(203, 174, 11, 180));
+        painter.setBrush(blocksFoundColor);
         QPolygonF graph(m_blocksFoundGraph);
         graph.append(QPointF(relativeTime / 500, graph.last().y()));
         graph.append(QPointF(relativeTime / 500, 0));
         QMatrix m2(matrix);
-        m2.scale(1, 3);
+        m2.scale(1, 5);
         painter.drawPolygon(m2.map(graph));
     }
 }
