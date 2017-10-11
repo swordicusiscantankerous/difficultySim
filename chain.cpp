@@ -58,7 +58,6 @@ void Chain::addBlock(int height)
         m_baseDifficulty = m_baseDifficulty * targetTimeSpan / actualTimeSpan;
         m_difficulty = m_baseDifficulty;
         m_timeLastPeriodStart = now;
-        m_blockTimeStamps.clear();
         emit difficultyChanged(m_difficulty);
         return;
     }

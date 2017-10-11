@@ -16,6 +16,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (ui->action_Quit, SIGNAL(triggered(bool)), QGuiApplication::instance(), SLOT(quit()));
     connect (ui->action_Pause, SIGNAL(triggered(bool)), &m_chain, SLOT(pause()));
     connect (&m_chain, SIGNAL(newBlock(int)), this, SLOT(newBlockFound(int)));
+    connect (&m_chain, SIGNAL(difficultyChanged(int)), ui->graphsFrame, SLOT(setDifficulty(int)));
+    ui->graphsFrame->setDifficulty(m_chain.difficulty());
     setStatusBar(nullptr);
 }
 
