@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (&m_chain, SIGNAL(newBlock(int)), this, SLOT(newBlockFound(int)));
     connect (&m_chain, SIGNAL(difficultyChanged(int)), ui->graphsFrame, SLOT(setDifficulty(int)));
     connect (&m_chain, SIGNAL(hashpowerChanged(int)), ui->graphsFrame, SLOT(setHashrate(int)));
+    connect (&m_chain, SIGNAL(newBlock(int)), ui->graphsFrame, SLOT(addBlock()));
     ui->graphsFrame->setDifficulty(m_chain.difficulty());
     setStatusBar(nullptr);
 

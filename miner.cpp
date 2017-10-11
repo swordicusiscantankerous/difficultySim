@@ -53,7 +53,7 @@ void Miner::startMining()
 
     // the chance I'll find the block is a random number.
     // adding more hashpower helps, though.
-    float chance = qrand() % 1000;
+    float chance = 400 + qrand() % 600;
     chance = chance * m_difficulty / m_hashPower ;
 
     // qDebug() << "miner will find block" << m_blockHeight << "in"  << chance << "difficulty now is" << m_difficulty;
