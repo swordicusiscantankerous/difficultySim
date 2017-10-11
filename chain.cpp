@@ -40,7 +40,7 @@ void Chain::addBlock(int height)
     m_height = height;
     if (m_height == 0) {
         m_timeLastPeriodStart = now;
-        m_baseDifficulty = m_difficulty = 10;
+        m_baseDifficulty = m_difficulty = 1000;
         return;
     }
     emit newBlock(m_height);
@@ -63,8 +63,18 @@ void Chain::addBlock(int height)
     }
     m_blockTimeStamps.append(now);
     if (m_blockTimeStamps.length() > 12) {
+        if (m_edaEnabled) {
+            // remember, time multiplication is 6000.
+            qint64 mtpTip = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7);
+            qint64 mtpTipMinus6 = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7 - 6);
+            // qDebug() << "diff" << (mtpTip - mtpTipMinus6);
+            if (mtpTip - mtpTipMinus6 > 1000 * 12 * 3600 / 6000) {
+                m_difficulty = qRound(m_difficulty * 0.8);
+                // qDebug() << "Adjustsing difficulty downards" << m_difficulty;
+                emit difficultyChanged(m_difficulty);
+            }
+        }
         // TODO calculate EDA or reverse EDA
-
     }
 }
 
@@ -112,4 +122,9 @@ void Chain::hashpowerChanged()
         totalHashpower += miner->hashPower();
     }
     emit hashpowerChanged(totalHashpower);
+}
+
+void Chain::setEdaEnabled(bool enabled)
+{
+    m_edaEnabled = enabled;
 }

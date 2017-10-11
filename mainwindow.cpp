@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     setStatusBar(nullptr);
 
     connect (ui->zoomLevel, SIGNAL(valueChanged(int)), ui->graphsFrame, SLOT(setGraphZoom(int)));
+    connect (ui->actionEDA, SIGNAL(triggered(bool)), &m_chain, SLOT(setEdaEnabled(bool)));
 
     addMiner();
 }

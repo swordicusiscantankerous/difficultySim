@@ -103,8 +103,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>715</width>
-         <height>80</height>
+         <width>711</width>
+         <height>68</height>
         </rect>
        </property>
       </widget>
@@ -129,7 +129,14 @@
     <addaction name="action_Pause"/>
     <addaction name="action_Quit"/>
    </widget>
+   <widget class="QMenu" name="menuOptions">
+    <property name="title">
+     <string>Optio&amp;ns</string>
+    </property>
+    <addaction name="actionEDA"/>
+   </widget>
    <addaction name="menuSimulation"/>
+   <addaction name="menuOptions"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -167,6 +174,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionEDA">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;EDA</string>
    </property>
   </action>
  </widget>

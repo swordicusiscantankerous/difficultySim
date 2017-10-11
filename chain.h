@@ -26,6 +26,7 @@ public slots:
     void deleteMiner(Miner* miner);
     void pause();
     void hashpowerChanged();
+    void setEdaEnabled(bool enabled);
 
 private:
     QList<Miner*> m_miners;
@@ -37,6 +38,8 @@ private:
     int m_baseDifficulty;
 
     int m_height;
+
+    bool m_edaEnabled;
 };
 
 #endif // CHAIN_H
