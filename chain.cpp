@@ -74,10 +74,12 @@ Miner *Chain::appendNewMiner()
     connect (newMiner, SIGNAL(blockFound(int)), this, SLOT(addBlock(int)));
     connect (this, SIGNAL(difficultyChanged(int)), newMiner, SLOT(setDifficulty(int)));
     connect (this, SIGNAL(newBlock(int)), newMiner, SLOT(setBlockHeight(int)));
+    connect (newMiner, SIGNAL(hashPowerChanged()), this, SLOT(hashpowerChanged()));
 
     newMiner->setBlockHeight(m_height);
     newMiner->setDifficulty(m_difficulty);
     m_miners.append(newMiner);
+    hashpowerChanged();
     return newMiner;
 }
 
@@ -87,6 +89,7 @@ void Chain::deleteMiner(Miner *miner)
 
     m_miners.removeAll(miner);
     disconnect (miner, SIGNAL(blockFound(int)), this, SLOT(addBlock(int)));
+    hashpowerChanged();
 }
 
 void Chain::pause()
@@ -100,4 +103,13 @@ void Chain::pause()
         m_pauseStart = 0;
         emit newBlock(m_height);
     }
+}
+
+void Chain::hashpowerChanged()
+{
+    int totalHashpower = 0;
+    foreach (auto miner, m_miners) {
+        totalHashpower += miner->hashPower();
+    }
+    emit hashpowerChanged(totalHashpower);
 }

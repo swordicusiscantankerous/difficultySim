@@ -19,11 +19,13 @@ public:
 signals:
     void difficultyChanged(int newDifficulty);
     void newBlock(int height);
+    void hashpowerChanged(int hashPower);
 
 public slots:
     void addBlock(int height);
     void deleteMiner(Miner* miner);
     void pause();
+    void hashpowerChanged();
 
 private:
     QList<Miner*> m_miners;

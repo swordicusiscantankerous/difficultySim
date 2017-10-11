@@ -13,6 +13,7 @@ public:
 
 public slots:
     void setDifficulty(int difficulty);
+    void setHashrate(int hashrate);
     void pause();
 
 protected:
@@ -21,6 +22,8 @@ protected:
 private:
     QTimer *m_repaintTimer;
     QPolygonF m_difficultyGraph;
+    QPolygonF m_hashrateGraph;
+    // QPolygonF m_blocksFoundGraph;
     qint64 m_startTime;
     qint64 m_pauseStart;
     int m_pixelsPerSecond;
