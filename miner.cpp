@@ -27,8 +27,6 @@ void Miner::setHashPower(int hashPower)
 
 void Miner::setBlockHeight(int height)
 {
-    if (m_blockHeight == height)
-        return;
     m_timer->stop();
     m_blockHeight = height;
     startMining();
@@ -50,7 +48,7 @@ void Miner::miningSuccessFull()
 void Miner::startMining()
 {
     m_timer->stop();
-    if (m_blockHeight < 0 || m_difficulty < 0)
+    if (m_blockHeight < 0 || m_difficulty < 0 || m_hashPower <= 0)
         return;
 
     // the chance I'll find the block is a random number.

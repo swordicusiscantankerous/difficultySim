@@ -4,10 +4,12 @@
 #include "chain.h"
 
 #include <QMainWindow>
+#include <QHBoxLayout>
 
 namespace Ui {
 class MainWindow;
 }
+class Miner;
 
 class MainWindow : public QMainWindow
 {
@@ -17,8 +19,13 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+private slots:
+    void addMiner();
+    void newBlockFound(int height);
+
 private:
     Ui::MainWindow *ui;
+    QHBoxLayout *m_minersLayout;
 
     Chain m_chain;
 };

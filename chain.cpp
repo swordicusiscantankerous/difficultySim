@@ -4,13 +4,13 @@
 #include <QDebug>
 
 Chain::Chain(QObject *parent) : QObject(parent),
+  m_timeLastPeriodStart(0),
+  m_pauseStart(0),
   m_difficulty(-1),
   m_baseDifficulty(-1),
   m_height(-1)
 {
     addBlock(0); // genesis
-    appendNewMiner();
-    appendNewMiner();
 }
 
 int Chain::difficulty() const
@@ -32,7 +32,8 @@ void Chain::addBlock(int height)
 
     if (m_height >= height)
         return;
-
+    if (m_pauseStart != 0) // we are paused
+        return;
 
     const qint64 now = QDateTime::currentMSecsSinceEpoch();
 
@@ -68,7 +69,7 @@ void Chain::addBlock(int height)
     }
 }
 
-void Chain::appendNewMiner()
+Miner *Chain::appendNewMiner()
 {
     Miner *newMiner = new Miner(this);
     connect (newMiner, SIGNAL(blockFound(int)), this, SLOT(addBlock(int)));
@@ -78,15 +79,26 @@ void Chain::appendNewMiner()
     newMiner->setBlockHeight(m_height);
     newMiner->setDifficulty(m_difficulty);
     m_miners.append(newMiner);
+    return newMiner;
 }
 
-void Chain::deleteMiner(int index)
+void Chain::deleteMiner(Miner *miner)
 {
-    if (index < 0 || m_miners.size() >= index)
-        return;
+    Q_ASSERT(miner);
 
-    Miner *miner = m_miners.takeAt(index);
+    m_miners.removeAll(miner);
     disconnect (miner, SIGNAL(blockFound(int)), this, SLOT(addBlock(int)));
+}
 
-    miner->deleteLater();
+void Chain::pause()
+{
+    const qint64 now = QDateTime::currentMSecsSinceEpoch();
+
+    if (m_pauseStart == 0) { // start pause
+        m_pauseStart = now;
+    } else {
+        m_timeLastPeriodStart += now - m_pauseStart;
+        m_pauseStart = 0;
+        emit newBlock(m_height);
+    }
 }

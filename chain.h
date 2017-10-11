@@ -14,6 +14,7 @@ public:
 
     int difficulty() const;
     void setDifficulty(int difficulty);
+    Miner* appendNewMiner();
 
 signals:
     void difficultyChanged(int newDifficulty);
@@ -21,13 +22,14 @@ signals:
 
 public slots:
     void addBlock(int height);
-    void appendNewMiner();
-    void deleteMiner(int index);
+    void deleteMiner(Miner* miner);
+    void pause();
 
 private:
     QList<Miner*> m_miners;
     QList<qint64> m_blockTimeStamps;
     qint64 m_timeLastPeriodStart;
+    qint64 m_pauseStart;
 
     int m_difficulty;
     int m_baseDifficulty;
