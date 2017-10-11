@@ -100,7 +100,7 @@ void GraphWidget::paintEvent(QPaintEvent *)
 
     QMatrix matrix;
     matrix.translate(0, height());
-    matrix.scale(0.5 * m_pixelsPerSecond, -height() / 4000.);
+    matrix.scale(0.5 * m_pixelsPerSecond, -height() / 8000.);
     painter.setRenderHint(QPainter::Antialiasing);
 
     const qint64 now = QDateTime::currentMSecsSinceEpoch();
@@ -115,7 +115,7 @@ void GraphWidget::paintEvent(QPaintEvent *)
 
     if (!m_blocksFoundGraph.isEmpty()) {
         QMatrix m2(matrix);
-        m2.scale(1, 60);
+        m2.scale(1, 120);
         QPolygonF graph(m_blocksFoundGraph);
         graph.append(QPointF(relativeTime / 500, graph.last().y()));
 
@@ -140,7 +140,7 @@ void GraphWidget::paintEvent(QPaintEvent *)
         QPolygonF graph(m_hashrateGraph);
         graph.append(QPointF(relativeTime / 500, graph.last().y()));
         QMatrix m2(matrix);
-        m2.scale(1, 3);
+        m2.scale(1, 6);
         painter.drawPolyline(m2.map(graph));
     }
 }
