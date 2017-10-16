@@ -155,4 +155,21 @@ void GraphWidget::paintEvent(QPaintEvent *)
     x += fontHeight * 1.5;
     painter.drawText(QPoint(x, 10 + fontHeight), "Blocks Found");
 
+
+    float pixelsPerWeek = m_pixelsPerSecond * 3600 * 24 * 7 / 6000;
+    int numDaysDrawn = 7;
+    while (numDaysDrawn != 1 && numDaysDrawn * (pixelsPerWeek / 7) > width() / 2) {
+        numDaysDrawn--;
+    }
+
+    painter.setPen(QPen(Qt::black, 1));
+    painter.drawText(QPoint(width() - pixelsPerWeek / 7 * numDaysDrawn, height() - 14 - fontHeight * 2),
+                     pixelsPerWeek < 105 ? "week" : (numDaysDrawn == 1 ? "day" : "days"));
+    painter.setBrush(QColor(255, 255, 255, 180));
+    painter.drawRect(width() - (pixelsPerWeek / 7 * numDaysDrawn) - 10, height() - 10 - fontHeight * 2,
+                     pixelsPerWeek / 7 * numDaysDrawn, fontHeight * 2);
+    for (int i = 1; i < numDaysDrawn; i+=2) {
+        painter.fillRect(width() - (pixelsPerWeek / 7) * (i + 1) - 10, height() - 10 - fontHeight * 2,
+                         pixelsPerWeek / 7, fontHeight * 2, QColor(0, 0, 0, 180));
+    }
 }
