@@ -115,7 +115,7 @@ int Chain::neilsAlgo() const
         // 2016 blocks is 2.2%.
         if (t < targetTimeSpan * 2016 * 95 / 100) {
             newDifficulty += (newDifficulty >> 8);
-            qDebug() << "long term nudging, increasing difficulty" << m_difficulty << newDifficulty;
+            // qDebug() << "long term nudging, increasing difficulty" << m_difficulty << newDifficulty;
         }
     }
 
@@ -128,12 +128,12 @@ int Chain::neilsAlgo() const
 
     // If too fast (< 30 mins), decrease the target by 1/256.
     if (mtp6blocks < targetTimeSpan * 30 / 10) {
-        qDebug() << "blocks too fast" << m_difficulty << newDifficulty;
+        // qDebug() << "blocks too fast" << m_difficulty << newDifficulty;
         newDifficulty += (newDifficulty >> 8);
     }
     // If too slow (> 128 mins), increase the target by 1/64.
     else if (mtp6blocks > targetTimeSpan * 128 / 10) {
-        qDebug() << "blocks too slow" << m_difficulty << newDifficulty;
+        // qDebug() << "blocks too slow" << m_difficulty << newDifficulty;
         newDifficulty -= (newDifficulty >> 6);
     }
 
