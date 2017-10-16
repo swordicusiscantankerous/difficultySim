@@ -4,13 +4,16 @@
 #include <QDebug>
 
 Chain::Chain(QObject *parent) : QObject(parent),
-  m_timeLastPeriodStart(0),
-  m_pauseStart(0),
-  m_difficulty(-1),
-  m_baseDifficulty(-1),
-  m_height(-1)
+    m_timeLastPeriodStart(0),
+    m_pauseStart(0),
+    m_difficulty(-1),
+    m_baseDifficulty(-1),
+    m_height(-1),
+    m_timer(new QTimer(this))
 {
     addBlock(0); // genesis
+    m_timer->setSingleShot(true);
+    connect (m_timer, SIGNAL(timeout()), this, SLOT(miningSuccessfull()));
 }
 
 int Chain::difficulty() const
@@ -48,22 +51,22 @@ void Chain::addBlock(int height)
     if (m_height  % 500 == 0)
         qDebug() << QTime::currentTime().toString() << m_height << "@" << m_difficulty;
 
-    if (m_height % 2016 == 0) {
-        // recalculate base difficulty.
-        const qint64 targetTimeSpan = 2016 * 600 * 1000 / 6000; // we aim to be a 6000 times faster than real-time.
-        qint64 actualTimeSpan = now - m_timeLastPeriodStart;
-        qDebug() << "Period completed. Wanted time:" << targetTimeSpan << "took:" << actualTimeSpan;
-        actualTimeSpan = qBound(targetTimeSpan / 4, actualTimeSpan, targetTimeSpan * 4);
+    if (m_algo == Satoshi || m_algo == EDA) {
+        if (m_height % 2016 == 0) {
+            const qint64 targetTimeSpan = 2016 * 600 * 1000 / 6000; // we aim to be a 6000 times faster than real-time.
+            // recalculate base difficulty.
+            qint64 actualTimeSpan = now - m_timeLastPeriodStart;
+            qDebug() << "Period completed. Wanted time:" << targetTimeSpan << "took:" << actualTimeSpan;
+            actualTimeSpan = qBound(targetTimeSpan / 4, actualTimeSpan, targetTimeSpan * 4);
 
-        m_baseDifficulty = m_baseDifficulty * targetTimeSpan / actualTimeSpan;
-        m_difficulty = m_baseDifficulty;
-        m_timeLastPeriodStart = now;
-        emit difficultyChanged(m_difficulty);
-        return;
-    }
-    m_blockTimeStamps.append(now);
-    if (m_blockTimeStamps.length() > 12) {
-        if (m_edaEnabled) {
+            m_baseDifficulty = m_baseDifficulty * targetTimeSpan / actualTimeSpan;
+            m_difficulty = m_baseDifficulty;
+            m_timeLastPeriodStart = now;
+            emit difficultyChanged(m_difficulty);
+            return;
+        }
+        m_blockTimeStamps.append(now);
+        if (m_algo == EDA && m_blockTimeStamps.length() > 12) {
             // remember, time multiplication is 6000.
             qint64 mtpTip = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7);
             qint64 mtpTipMinus6 = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7 - 6);
@@ -74,22 +77,78 @@ void Chain::addBlock(int height)
                 emit difficultyChanged(m_difficulty);
             }
         }
-        // TODO calculate EDA or reverse EDA
     }
+    else if (m_algo == Neil) {
+        m_blockTimeStamps.append(now);
+        int newDifficulty = neilsAlgo();
+        if (newDifficulty != m_difficulty) {
+            m_difficulty = newDifficulty;
+            emit difficultyChanged(m_difficulty);
+        }
+    }
+}
+
+int Chain::neilsAlgo() const
+{
+    const qint64 targetTimeSpan = 600 * 1000 / 6000; // we aim to be a 6000 times faster than real-time.
+    const int ProofOfWorkLimit = 1000;
+
+    // Height of next block
+    // uint32_t nHeight = pindexPrev ? pindexPrev->nHeight + 1 : 0;
+
+    // First 6 blocks have genesis block difficulty
+    if (m_height <= 6)
+        return ProofOfWorkLimit;
+
+    int newDifficulty = m_difficulty;
+
+    // Long-term block production time stabiliser that should rarely
+    // trigger.  Should miners produce blocks considerably faster than
+    // target spacing but collude to fudge timestamps to stay above the 30
+    // minute window, ensure difficulty will rise to compensate anyway.
+    if (m_height > 2016) {
+        qint64 t = m_blockTimeStamps.last() - m_blockTimeStamps.at(m_blockTimeStamps.size() - 2017);
+
+        qDebug() << "expected period;" << targetTimeSpan * 2016 * 95 / 100 << "actual" << t;
+
+        // If too fast, decrease the target by 1/256.  Std deviation over
+        // 2016 blocks is 2.2%.
+        if (t < targetTimeSpan * 2016 * 95 / 100) {
+            newDifficulty += (newDifficulty >> 8);
+            qDebug() << "long term nudging, increasing difficulty" << m_difficulty << newDifficulty;
+        }
+    }
+
+    // Determine the MTP difference - the difference between the MTP
+    // of the previous block, and the block 6 blocks earlier
+
+    const qint64 mtpTip = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7);
+    const qint64 mtpTipMinus6 = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7 - 6);
+    const int64_t mtp6blocks = mtpTip - mtpTipMinus6;
+
+    // If too fast (< 30 mins), decrease the target by 1/256.
+    if (mtp6blocks < targetTimeSpan * 30 / 10) {
+        qDebug() << "blocks too fast" << m_difficulty << newDifficulty;
+        newDifficulty += (newDifficulty >> 8);
+    }
+    // If too slow (> 128 mins), increase the target by 1/64.
+    else if (mtp6blocks > targetTimeSpan * 128 / 10) {
+        qDebug() << "blocks too slow" << m_difficulty << newDifficulty;
+        newDifficulty -= (newDifficulty >> 6);
+    }
+
+    // We can't go below the minimum target
+    return std::max(newDifficulty, ProofOfWorkLimit);
 }
 
 Miner *Chain::appendNewMiner()
 {
     Miner *newMiner = new Miner(this);
-    connect (newMiner, SIGNAL(blockFound(int)), this, SLOT(addBlock(int)));
-    connect (this, SIGNAL(difficultyChanged(int)), newMiner, SLOT(setDifficulty(int)));
-    connect (this, SIGNAL(newBlock(int)), newMiner, SLOT(setBlockHeight(int)));
     connect (newMiner, SIGNAL(hashPowerChanged()), this, SLOT(hashpowerChanged()));
 
-    newMiner->setBlockHeight(m_height);
-    newMiner->setDifficulty(m_difficulty);
     m_miners.append(newMiner);
     hashpowerChanged();
+    doMine();
     return newMiner;
 }
 
@@ -98,7 +157,6 @@ void Chain::deleteMiner(Miner *miner)
     Q_ASSERT(miner);
 
     m_miners.removeAll(miner);
-    disconnect (miner, SIGNAL(blockFound(int)), this, SLOT(addBlock(int)));
     hashpowerChanged();
 }
 
@@ -108,10 +166,11 @@ void Chain::pause()
 
     if (m_pauseStart == 0) { // start pause
         m_pauseStart = now;
+        m_timer->stop();
     } else {
         m_timeLastPeriodStart += now - m_pauseStart;
         m_pauseStart = 0;
-        emit newBlock(m_height);
+        doMine();
     }
 }
 
@@ -124,7 +183,39 @@ void Chain::hashpowerChanged()
     emit hashpowerChanged(totalHashpower);
 }
 
-void Chain::setEdaEnabled(bool enabled)
+void Chain::setAdjustmentAlgorithm(Chain::AdjustmentAlgorithm algo)
 {
-    m_edaEnabled = enabled;
+    m_algo = algo;
+}
+
+void Chain::doMine()
+{
+    // Calculate the time till a new block is expected.
+    m_timer->stop();
+
+    int hashPower = 0;
+    foreach (const Miner *miner, m_miners) {
+        hashPower += miner->hashPower();
+    }
+    if (hashPower == 0 || m_pauseStart)
+        return;
+
+    int timeTillNextBlock = 20 * m_difficulty / hashPower;
+    int sleep = 0;
+    if (m_blockTimeStamps.isEmpty()) {
+        sleep = timeTillNextBlock;
+    } else {
+        const qint64 now = QDateTime::currentMSecsSinceEpoch();
+        const qint64 last = m_blockTimeStamps.last();
+        sleep = last + timeTillNextBlock - now;
+    }
+
+    // qDebug() << "miners will find block" << m_height << "in"  << sleep << "ms, difficulty:" << m_difficulty << "HP:" << hashPower;
+    m_timer->start(qMax(10, sleep));
+}
+
+void Chain::miningSuccessfull()
+{
+    addBlock(m_height + 1);
+    doMine();
 }

@@ -133,7 +133,9 @@
     <property name="title">
      <string>Optio&amp;ns</string>
     </property>
+    <addaction name="actionSatoshi"/>
     <addaction name="actionEDA"/>
+    <addaction name="actionNeil"/>
    </widget>
    <addaction name="menuSimulation"/>
    <addaction name="menuOptions"/>
@@ -182,6 +184,31 @@
    </property>
    <property name="text">
     <string>&amp;EDA</string>
+   </property>
+   <property name="toolTip">
+    <string>Enable the Emergency Difficulty Adjustment</string>
+   </property>
+  </action>
+  <action name="actionNeil">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Neil</string>
+   </property>
+   <property name="toolTip">
+    <string>Select the new Algorithm</string>
+   </property>
+  </action>
+  <action name="actionSatoshi">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Satoshi</string>
+   </property>
+   <property name="toolTip">
+    <string>Select the original algorithm</string>
    </property>
   </action>
  </widget>

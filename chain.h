@@ -10,11 +10,17 @@ class Chain : public QObject
     Q_OBJECT
 
 public:
+    enum AdjustmentAlgorithm {
+        Satoshi,
+        EDA,
+        Neil
+    };
     explicit Chain(QObject *parent = nullptr);
 
     int difficulty() const;
     void setDifficulty(int difficulty);
     Miner* appendNewMiner();
+    void addBlock(int height);
 
 signals:
     void difficultyChanged(int newDifficulty);
@@ -22,13 +28,18 @@ signals:
     void hashpowerChanged(int hashPower);
 
 public slots:
-    void addBlock(int height);
     void deleteMiner(Miner* miner);
     void pause();
     void hashpowerChanged();
-    void setEdaEnabled(bool enabled);
+    void setAdjustmentAlgorithm(AdjustmentAlgorithm algo);
+
+private slots:
+    void doMine();
+    void miningSuccessfull();
 
 private:
+    int neilsAlgo() const;
+
     QList<Miner*> m_miners;
     QList<qint64> m_blockTimeStamps;
     qint64 m_timeLastPeriodStart;
@@ -39,7 +50,9 @@ private:
 
     int m_height;
 
-    bool m_edaEnabled;
+    AdjustmentAlgorithm m_algo;
+
+    QTimer *m_timer;
 };
 
 #endif // CHAIN_H

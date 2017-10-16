@@ -22,6 +22,7 @@ public:
 private slots:
     void addMiner();
     void newBlockFound(int height);
+    void algoChanged();
 
 private:
     Ui::MainWindow *ui;

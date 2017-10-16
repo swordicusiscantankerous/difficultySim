@@ -2,6 +2,7 @@
 #include "minerwidget.h"
 #include "ui_mainwindow.h"
 
+#include <QActionGroup>
 #include <QSlider>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -12,6 +13,13 @@ MainWindow::MainWindow(QWidget *parent) :
     m_minersLayout = new QHBoxLayout(ui->minersForm);
     QWidget *dummy = new QWidget(ui->minersForm);
     m_minersLayout->addWidget(dummy, 100);
+
+    QActionGroup *group = new QActionGroup(this);
+    group->addAction(ui->actionSatoshi);
+    group->addAction(ui->actionEDA);
+    group->addAction(ui->actionNeil);
+    // group->setExclusive(true);
+    ui->actionSatoshi->setChecked(true);
 
     connect(ui->actionNew_Miner, SIGNAL(triggered(bool)), this, SLOT(addMiner()));
     connect (ui->action_Quit, SIGNAL(triggered(bool)), QGuiApplication::instance(), SLOT(quit()));
@@ -25,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
     setStatusBar(nullptr);
 
     connect (ui->zoomLevel, SIGNAL(valueChanged(int)), ui->graphsFrame, SLOT(setGraphZoom(int)));
-    connect (ui->actionEDA, SIGNAL(triggered(bool)), &m_chain, SLOT(setEdaEnabled(bool)));
+    connect (group, SIGNAL(triggered(QAction*)), this, SLOT(algoChanged()));
 
     addMiner();
 }
@@ -47,4 +55,16 @@ void MainWindow::newBlockFound(int height)
 {
     ui->progressBar->setValue(height % 2016);
     ui->blockIndex->setNum(height);
+}
+
+void MainWindow::algoChanged()
+{
+    Chain::AdjustmentAlgorithm algo;
+    if (ui->actionSatoshi->isChecked())
+        algo = Chain::Satoshi;
+    else if (ui->actionEDA->isChecked())
+        algo = Chain::EDA;
+    else
+        algo = Chain::Neil;
+    m_chain.setAdjustmentAlgorithm(algo);
 }
