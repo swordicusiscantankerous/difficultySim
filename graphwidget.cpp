@@ -81,23 +81,8 @@ void GraphWidget::paintEvent(QPaintEvent *)
     const QColor hashRateColor(255, 145, 21);
 
     QPainter painter(this);
-    painter.fillRect(0, 0, width(), height(), Qt::white);
     painter.setFont(QFont("Sans", 10));
-    painter.setPen(Qt::black);
-    int fontHeight = painter.fontMetrics().xHeight();
-    int x = 15;
-    painter.fillRect(x, 10, fontHeight, fontHeight, difficultyColor);
-    x += fontHeight * 1.5;
-    painter.drawText(QPoint(x, 10 + fontHeight), "Difficulty");
-    x += painter.fontMetrics().width("Difficulty") + fontHeight;
-    painter.fillRect(x, 10, fontHeight, fontHeight, hashRateColor);
-    x += fontHeight * 1.5;
-    painter.drawText(QPoint(x, 10 + fontHeight), "Hashrate");
-    x += painter.fontMetrics().width("Hashrate") + fontHeight;
-    painter.fillRect(x, 10, fontHeight, fontHeight, blocksFoundColor.darker());
-    x += fontHeight * 1.5;
-    painter.drawText(QPoint(x, 10 + fontHeight), "Blocks Found");
-
+    painter.fillRect(0, 0, width(), height(), Qt::white);
     QMatrix matrix;
     matrix.translate(0, height());
     matrix.scale(0.5 * m_pixelsPerSecond, -height() / 8000.);
@@ -107,14 +92,16 @@ void GraphWidget::paintEvent(QPaintEvent *)
     const qint64 relativeTime = now - m_startTime;
     const double widgetWidthInUnits = width() / (float) m_pixelsPerSecond;
     const double overShoot = relativeTime / 1000. - widgetWidthInUnits;
+    QMatrix modelToViewMatrix(matrix);
     if (overShoot > 0) {
         int offset = qRound(overShoot);
         offset = 4 + offset - (offset % 4); // aim for 4 second jumps
-        matrix.translate(-offset * 2, 0);
+        modelToViewMatrix.translate(-offset * 2, 0);
     }
 
+    const int fontHeight = painter.fontMetrics().xHeight();
     if (!m_blocksFoundGraph.isEmpty()) {
-        QMatrix m2(matrix);
+        QMatrix m2(modelToViewMatrix);
         m2.scale(1, 120);
         QPolygonF graph(m_blocksFoundGraph);
         graph.append(QPointF(relativeTime / 500, graph.last().y()));
@@ -127,20 +114,45 @@ void GraphWidget::paintEvent(QPaintEvent *)
         painter.setPen(Qt::NoPen);
         painter.setBrush(blocksFoundColor);
         painter.drawPolygon(m2.map(graph));
+
+        m2 = QMatrix(matrix); // skip the offset in time.
+        m2.scale(1, 120);
+        painter.setPen(QPen(Qt::red, 1, Qt::DashDotDotLine));
+        const QPointF tenBPS = m2.map(QPointF(0, 10));
+        painter.drawLine(0, tenBPS.y(), width(), tenBPS.y()); // 10 blocks per second.
+        painter.setPen(Qt::black);
+        painter.drawText(QPoint(10, -1) + m2.map(QPointF(0, 10)), "10-minute-block");
     }
+
     if (!m_difficultyGraph.isEmpty()) {
         painter.setPen(QPen(difficultyColor));
         QPolygonF graph(m_difficultyGraph);
         graph.append(QPointF(relativeTime / 500, graph.last().y()));
-        painter.drawPolyline(matrix.map(graph));
+        painter.drawPolyline(modelToViewMatrix.map(graph));
     }
 
     if (!m_hashrateGraph.isEmpty()) {
         painter.setPen(QPen(hashRateColor));
         QPolygonF graph(m_hashrateGraph);
         graph.append(QPointF(relativeTime / 500, graph.last().y()));
-        QMatrix m2(matrix);
+        QMatrix m2(modelToViewMatrix);
         m2.scale(1, 6);
         painter.drawPolyline(m2.map(graph));
     }
+
+
+    int x = 15;
+    painter.setPen(Qt::black);
+    painter.fillRect(x, 10, fontHeight, fontHeight, difficultyColor);
+    x += fontHeight * 1.5;
+    painter.drawText(QPoint(x, 10 + fontHeight), "Difficulty");
+    x += painter.fontMetrics().width("Difficulty") + fontHeight;
+    painter.fillRect(x, 10, fontHeight, fontHeight, hashRateColor);
+    x += fontHeight * 1.5;
+    painter.drawText(QPoint(x, 10 + fontHeight), "Hashrate");
+    x += painter.fontMetrics().width("Hashrate") + fontHeight;
+    painter.fillRect(x, 10, fontHeight, fontHeight, blocksFoundColor.darker());
+    x += fontHeight * 1.5;
+    painter.drawText(QPoint(x, 10 + fontHeight), "Blocks Found");
+
 }
