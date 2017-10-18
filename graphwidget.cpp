@@ -145,10 +145,10 @@ void GraphWidget::paintEvent(QPaintEvent *)
         m2 = QMatrix(matrix); // skip the offset in time.
         m2.scale(1, 120);
         painter.setPen(QPen(Qt::red, 1, Qt::DashDotDotLine));
-        const QPointF tenBPS = m2.map(QPointF(0, 10));
-        painter.drawLine(0, tenBPS.y(), width(), tenBPS.y()); // 10 blocks per second.
+        const QPointF tenBPS = m2.map(QPointF(0, 6));
+        painter.drawLine(0, tenBPS.y(), width(), tenBPS.y()); // 6 blocks per hour
         painter.setPen(Qt::black);
-        painter.drawText(QPoint(10, -1) + m2.map(QPointF(0, 10)), "10-minute-block");
+        painter.drawText(QPoint(10, -1) + m2.map(QPointF(0, 6)), "10-minute-block");
     }
 
     if (!m_difficultyGraph.isEmpty()) {
