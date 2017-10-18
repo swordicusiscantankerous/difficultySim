@@ -3,6 +3,8 @@
 #include <QDateTime>
 #include <QDebug>
 
+#include <math.h>
+
 Chain::Chain(QObject *parent) : QObject(parent),
     m_timeLastPeriodStart(0),
     m_pauseStart(0),
@@ -200,18 +202,18 @@ void Chain::doMine()
     if (hashPower == 0 || m_pauseStart)
         return;
 
-    int timeTillNextBlock = 20 * m_difficulty / hashPower;
-    int sleep = 0;
-    if (m_blockTimeStamps.isEmpty()) {
-        sleep = timeTillNextBlock;
-    } else {
+    double timeTillNextBlock = 20 * m_difficulty / hashPower;
+    double sample = (qrand() % (int) 1E6) / 1E6;
+    double lambda = 1 / timeTillNextBlock;
+    int sleep = 0.5 + log(1. - sample) / -lambda;
+    if (!m_blockTimeStamps.isEmpty()) {
         const qint64 now = QDateTime::currentMSecsSinceEpoch();
         const qint64 last = m_blockTimeStamps.last();
-        sleep = last + timeTillNextBlock - now;
+        sleep = last + sleep - now;
     }
 
-    // qDebug() << "miners will find block" << m_height << "in"  << sleep << "ms, difficulty:" << m_difficulty << "HP:" << hashPower;
-    m_timer->start(qMax(10, sleep));
+    // qDebug() << "miners will find block" << m_height << "in" << qMax(1, sleep) * 6 << "s, difficulty:" << m_difficulty << "HP:" << hashPower;
+    m_timer->start(qMax(1, sleep));
 }
 
 void Chain::miningSuccessfull()
