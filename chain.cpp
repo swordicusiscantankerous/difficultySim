@@ -111,7 +111,7 @@ int Chain::neilsAlgo() const
     if (m_height > 2016) {
         qint64 t = m_blockTimeStamps.last() - m_blockTimeStamps.at(m_blockTimeStamps.size() - 2017);
 
-        qDebug() << "expected period;" << targetTimeSpan * 2016 * 95 / 100 << "actual" << t;
+        // qDebug() << "expected period;" << targetTimeSpan * 2016 * 95 / 100 << "actual" << t;
 
         // If too fast, decrease the target by 1/256.  Std deviation over
         // 2016 blocks is 2.2%.
