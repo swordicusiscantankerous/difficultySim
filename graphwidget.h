@@ -24,6 +24,8 @@ private:
     QPolygonF m_difficultyGraph;
     QPolygonF m_hashrateGraph;
     QPolygonF m_blocksFoundGraph;
+    QPolygonF m_blocksFoundAverageGraph;
+    // QPainterPath m_blocksFound;
     qint64 m_startTime;
     qint64 m_pauseStart;
     float m_pixelsPerSecond;

@@ -183,7 +183,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>&amp;EDA</string>
+    <string> EDA (deadalnix)</string>
    </property>
    <property name="toolTip">
     <string>Enable the Emergency Difficulty Adjustment</string>

@@ -6,6 +6,8 @@
 #include <QDebug>
 #include <qdatetime.h>
 
+#define AVERAGE_SAMPLES 10
+
 GraphWidget::GraphWidget(QWidget *parent) : QWidget(parent),
     m_repaintTimer(new QTimer(this)),
     m_startTime(QDateTime::currentMSecsSinceEpoch()),
@@ -18,7 +20,7 @@ GraphWidget::GraphWidget(QWidget *parent) : QWidget(parent),
     connect (m_repaintTimer, SIGNAL(timeout()), this, SLOT(repaint()));
     m_repaintTimer->start();
 
-    m_blocksFoundGraph << QPointF();
+    m_blocksFoundAverageGraph << QPointF();
 }
 
 void GraphWidget::setDifficulty(int difficulty)
@@ -43,13 +45,22 @@ void GraphWidget::addBlock()
 {
     if (m_pauseStart != 0)
         return;
-    const int UnitTime = 1000;
+    const int UnitTime = 600;
     const qint64 now = QDateTime::currentMSecsSinceEpoch();
     if (now - m_unitStartTime > UnitTime) {// start new unit
         const qint64 relativeTime = now - m_startTime;
         m_blocksFoundGraph.append(QPointF(relativeTime / 500, m_blocksFoundThisUnit));
         m_blocksFoundThisUnit = 1;
         m_unitStartTime = now;
+        if (m_blocksFoundGraph.size() >= 10) {
+            int total = 0;
+            for (int i = 1; i <= AVERAGE_SAMPLES; ++i)
+                total += m_blocksFoundGraph.at(m_blocksFoundGraph.size() - i).y();
+
+            m_blocksFoundAverageGraph.append(QPointF(relativeTime / 500, total / (qreal) AVERAGE_SAMPLES));
+        } else {
+            m_blocksFoundAverageGraph = m_blocksFoundGraph;
+        }
     } else {
         ++m_blocksFoundThisUnit;
     }
@@ -103,17 +114,33 @@ void GraphWidget::paintEvent(QPaintEvent *)
     if (!m_blocksFoundGraph.isEmpty()) {
         QMatrix m2(modelToViewMatrix);
         m2.scale(1, 120);
-        QPolygonF graph(m_blocksFoundGraph);
-        graph.append(QPointF(relativeTime / 500, graph.last().y()));
 
-        painter.setBrush(Qt::NoBrush);
-        painter.setPen(blocksFoundColor.darker());
-        painter.drawPolyline(m2.map(m_blocksFoundGraph));
+        if (!m_blocksFoundAverageGraph.isEmpty()) {
+            QPolygonF graph(m_blocksFoundAverageGraph);
+            int total = 0;;
+            int sampleCount = 0;
+            for (int i = 1; i <= AVERAGE_SAMPLES && i < m_blocksFoundGraph.count(); ++i) {
+                if (graph.last().x() == m_blocksFoundGraph.at(m_blocksFoundGraph.count() - i).x())
+                    break;
+                total += m_blocksFoundGraph.at(m_blocksFoundGraph.count() - ++sampleCount).y();
+            }
+            if (sampleCount > 0)
+                graph.append(QPointF(relativeTime / 500, total / (qreal) sampleCount));
+            else
+                graph.append(QPointF(relativeTime / 500, graph.last().y()));
 
-        graph.append(QPointF(relativeTime / 500, 0));
-        painter.setPen(Qt::NoPen);
-        painter.setBrush(blocksFoundColor);
-        painter.drawPolygon(m2.map(graph));
+            painter.setBrush(Qt::NoBrush);
+            painter.setPen(blocksFoundColor.darker());
+            painter.drawPolyline(m2.map(m_blocksFoundAverageGraph));
+
+            graph.append(QPointF(relativeTime / 500, 0));
+            painter.setPen(Qt::NoPen);
+            painter.setBrush(blocksFoundColor);
+            painter.drawPolygon(m2.map(graph));
+        }
+
+        painter.setPen(QPen(QColor(153, 38, 40), 2));
+        painter.drawPoints(m2.map(m_blocksFoundGraph));
 
         m2 = QMatrix(matrix); // skip the offset in time.
         m2.scale(1, 120);
@@ -164,7 +191,7 @@ void GraphWidget::paintEvent(QPaintEvent *)
 
     painter.setPen(QPen(Qt::black, 1));
     painter.drawText(QPoint(width() - pixelsPerWeek / 7 * numDaysDrawn, height() - 14 - fontHeight * 2),
-                     pixelsPerWeek < 105 ? "week" : (numDaysDrawn == 1 ? "day" : "days"));
+                     pixelsPerWeek < 105 ? "1 week" : (numDaysDrawn == 1 ? "day" : "days"));
     painter.setBrush(QColor(255, 255, 255, 180));
     painter.drawRect(width() - (pixelsPerWeek / 7 * numDaysDrawn) - 10, height() - 10 - fontHeight * 2,
                      pixelsPerWeek / 7 * numDaysDrawn, fontHeight * 2);
