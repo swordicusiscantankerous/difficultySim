@@ -139,8 +139,10 @@ void GraphWidget::paintEvent(QPaintEvent *)
             painter.drawPolygon(m2.map(graph));
         }
 
-        painter.setPen(QPen(QColor(153, 38, 40), 2));
-        painter.drawPoints(m2.map(m_blocksFoundGraph));
+        if (m_pixelsPerSecond > 1.5) {
+            painter.setPen(QPen(QColor(153, 38, 40), 2));
+            painter.drawPoints(m2.map(m_blocksFoundGraph));
+        }
 
         m2 = QMatrix(matrix); // skip the offset in time.
         m2.scale(1, 120);
