@@ -136,6 +136,7 @@
     <addaction name="actionSatoshi"/>
     <addaction name="actionEDA"/>
     <addaction name="actionNeil"/>
+    <addaction name="actiondEDA"/>
    </widget>
    <addaction name="menuSimulation"/>
    <addaction name="menuOptions"/>
@@ -211,6 +212,17 @@
     <string>Select the original algorithm</string>
    </property>
   </action>
+  <action name="actiondEDA">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string> dEDA </string>
+   </property>
+    <property name="toolTip">
+     <string>Select dualEDA</string>
+    </property>
+   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

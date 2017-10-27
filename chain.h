@@ -13,7 +13,8 @@ public:
     enum AdjustmentAlgorithm {
         Satoshi,
         EDA,
-        Neil
+        Neil,
+        dEDA
     };
     explicit Chain(QObject *parent = nullptr);
 
@@ -47,7 +48,7 @@ private:
 
     int m_difficulty;
     int m_baseDifficulty;
-
+    int m_emergencyCount;
     int m_height;
 
     AdjustmentAlgorithm m_algo;

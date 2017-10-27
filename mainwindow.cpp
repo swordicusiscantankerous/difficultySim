@@ -18,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     group->addAction(ui->actionSatoshi);
     group->addAction(ui->actionEDA);
     group->addAction(ui->actionNeil);
+    group->addAction(ui->actiondEDA);
     // group->setExclusive(true);
     ui->actionSatoshi->setChecked(true);
 
@@ -64,7 +65,9 @@ void MainWindow::algoChanged()
         algo = Chain::Satoshi;
     else if (ui->actionEDA->isChecked())
         algo = Chain::EDA;
-    else
+    else if (ui->actionNeil->isChecked())
         algo = Chain::Neil;
+    else
+        algo = Chain::dEDA;
     m_chain.setAdjustmentAlgorithm(algo);
 }

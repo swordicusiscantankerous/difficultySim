@@ -10,6 +10,7 @@ Chain::Chain(QObject *parent) : QObject(parent),
     m_pauseStart(0),
     m_difficulty(-1),
     m_baseDifficulty(-1),
+    m_emergencyCount(0),
     m_height(-1),
     m_timer(new QTimer(this))
 {
@@ -53,15 +54,23 @@ void Chain::addBlock(int height)
     if (m_height  % 500 == 0)
         qDebug() << QTime::currentTime().toString() << m_height << "@" << m_difficulty;
 
-    if (m_algo == Satoshi || m_algo == EDA) {
+    if (m_algo == Satoshi || m_algo == EDA || m_algo == dEDA) {
         if (m_height % 2016 == 0) {
             const qint64 targetTimeSpan = 2016 * 600 * 1000 / 6000; // we aim to be a 6000 times faster than real-time.
             // recalculate base difficulty.
             qint64 actualTimeSpan = now - m_timeLastPeriodStart;
             qDebug() << "Period completed. Wanted time:" << targetTimeSpan << "took:" << actualTimeSpan;
             actualTimeSpan = qBound(targetTimeSpan / 4, actualTimeSpan, targetTimeSpan * 4);
-
-            m_baseDifficulty = m_baseDifficulty * targetTimeSpan / actualTimeSpan;
+            if(m_algo == dEDA){/////////dEDA
+                if(m_emergencyCount > 0){
+                    m_baseDifficulty = m_baseDifficulty * targetTimeSpan / actualTimeSpan;
+                    m_emergencyCount = 0;
+                }else{
+                    m_baseDifficulty = m_baseDifficulty * targetTimeSpan / actualTimeSpan;
+                }
+            }else{//////////original.
+                m_baseDifficulty = m_baseDifficulty * targetTimeSpan / actualTimeSpan;
+            }
             m_difficulty = m_baseDifficulty;
             m_timeLastPeriodStart = now;
             emit difficultyChanged(m_difficulty);
@@ -75,6 +84,24 @@ void Chain::addBlock(int height)
             // qDebug() << "diff" << (mtpTip - mtpTipMinus6);
             if (mtpTip - mtpTipMinus6 > 1000 * 12 * 3600 / 6000) {
                 m_difficulty = qRound(m_difficulty * 0.8);
+                // qDebug() << "Adjustsing difficulty downards" << m_difficulty;
+                emit difficultyChanged(m_difficulty);
+            }
+        }
+        if (m_algo == dEDA && m_blockTimeStamps.length() > 12) {//////dual EDA code here
+            // remember, time multiplication is 6000.
+            qint64 mtpTip = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7);
+            qint64 mtpTipMinus6 = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7 - 6);
+            // qDebug() << "diff" << (mtpTip - mtpTipMinus6);
+            int tmpemergency = m_emergencyCount;
+            if (mtpTip - mtpTipMinus6 > 6 * 600 * 12 * 1000 / 6000) {//////////1st downward //12 hour blocks
+                m_emergencyCount++;
+            }
+            if (mtpTip - mtpTipMinus6 < 600 * 1000 / 6000 && m_emergencyCount > 0) {/////2nd upward //10 min blocks
+                m_emergencyCount--;
+            }
+            if (tmpemergency != m_emergencyCount) {
+                m_difficulty = qRound(m_baseDifficulty * pow(0.8, m_emergencyCount));
                 // qDebug() << "Adjustsing difficulty downards" << m_difficulty;
                 emit difficultyChanged(m_difficulty);
             }
