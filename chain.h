@@ -14,7 +14,8 @@ public:
         Satoshi,
         EDA,
         Neil,
-        dEDA
+        dEDA,
+        dEDAmodTom
     };
     explicit Chain(QObject *parent = nullptr);
 

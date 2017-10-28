@@ -137,6 +137,7 @@
     <addaction name="actionEDA"/>
     <addaction name="actionNeil"/>
     <addaction name="actiondEDA"/>
+    <addaction name="actiondEDAmodTom"/>
    </widget>
    <addaction name="menuSimulation"/>
    <addaction name="menuOptions"/>
@@ -219,10 +220,21 @@
    <property name="text">
     <string> dEDA </string>
    </property>
-    <property name="toolTip">
-     <string>Select dualEDA</string>
-    </property>
-   </action>
+   <property name="toolTip">
+    <string>Select dualEDAv1</string>
+   </property>
+  </action>
+  <action name="actiondEDAmodTom">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string> dEDAmodTom </string>
+   </property>
+   <property name="toolTip">
+    <string>Select dualEDAmodTom</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
