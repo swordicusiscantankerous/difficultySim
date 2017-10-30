@@ -18,7 +18,6 @@ MainWindow::MainWindow(QWidget *parent) :
     group->addAction(ui->actionSatoshi);
     group->addAction(ui->actionEDA);
     group->addAction(ui->actionNeil);
-    // group->setExclusive(true);
     ui->actionSatoshi->setChecked(true);
 
     connect(ui->actionNew_Miner, SIGNAL(triggered(bool)), this, SLOT(addMiner()));
@@ -35,7 +34,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (ui->zoomLevel, SIGNAL(valueChanged(int)), ui->graphsFrame, SLOT(setGraphZoom(int)));
     connect (group, SIGNAL(triggered(QAction*)), this, SLOT(algoChanged()));
 
-    addMiner();
+    addMiner(100);
+    addMiner(120);
 }
 
 MainWindow::~MainWindow()
@@ -43,9 +43,10 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::addMiner()
+void MainWindow::addMiner(int strength)
 {
     Miner *miner = m_chain.appendNewMiner();
+    miner->setHashPower(strength);
     MinerWidget *widget = new MinerWidget(miner, ui->minersForm);
     m_minersLayout->insertWidget(m_minersLayout->count() - 1, widget);
     connect (widget, SIGNAL(deletePressed(Miner*)), &m_chain, SLOT(deleteMiner(Miner*)));

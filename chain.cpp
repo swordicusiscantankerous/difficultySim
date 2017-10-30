@@ -45,7 +45,7 @@ void Chain::addBlock(int height)
     m_height = height;
     if (m_height == 0) {
         m_timeLastPeriodStart = now;
-        m_baseDifficulty = m_difficulty = 1000;
+        m_baseDifficulty = m_difficulty = 20000;
         return;
     }
     emit newBlock(m_height);
@@ -202,7 +202,7 @@ void Chain::doMine()
     if (hashPower == 0 || m_pauseStart)
         return;
 
-    double timeTillNextBlock = 20 * m_difficulty / hashPower;
+    double timeTillNextBlock = m_difficulty / hashPower;
     double sample = (qrand() % (int) 1E6) / 1E6;
     double lambda = 1 / timeTillNextBlock;
     int sleep = 0.5 + log(1. - sample) / -lambda;

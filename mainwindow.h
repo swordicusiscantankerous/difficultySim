@@ -20,7 +20,7 @@ public:
     ~MainWindow();
 
 private slots:
-    void addMiner();
+    void addMiner(int strength = 100);
     void newBlockFound(int height);
     void algoChanged();
 
