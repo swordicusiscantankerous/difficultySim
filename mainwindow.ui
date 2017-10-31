@@ -67,6 +67,13 @@
           </widget>
          </item>
          <item>
+          <widget class="QLabel" name="label_Algo">
+           <property name="text">
+            <string>Satoshi</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QProgressBar" name="progressBar">
            <property name="maximum">
             <number>2016</number>
@@ -136,6 +143,11 @@
     <addaction name="actionSatoshi"/>
     <addaction name="actionEDA"/>
     <addaction name="actionNeil"/>
+    <addaction name="actiondEDA"/>
+    <addaction name="actiondEDAmodTom"/>
+    <addaction name="actionDeadalnix"/>
+    <addaction name="actioncw144"/>
+    <addaction name="actionwt144"/>
    </widget>
    <addaction name="menuSimulation"/>
    <addaction name="menuOptions"/>
@@ -209,6 +221,61 @@
    </property>
    <property name="toolTip">
     <string>Select the original algorithm</string>
+   </property>
+  </action>
+  <action name="actiondEDA">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string> dEDA </string>
+   </property>
+   <property name="toolTip">
+    <string>Select dualEDAv1</string>
+   </property>
+  </action>
+  <action name="actiondEDAmodTom">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string> dEDAmodTom </string>
+   </property>
+   <property name="toolTip">
+    <string>Select dualEDAmodTom</string>
+   </property>
+  </action>
+  <action name="actionDeadalnix">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>  Deadalnix </string>
+   </property>
+   <property name="toolTip">
+    <string>Select Deadalnix</string>
+   </property>
+  </action>
+  <action name="actioncw144">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>  cw144 </string>
+   </property>
+   <property name="toolTip">
+    <string>Select cw144</string>
+   </property>
+  </action>
+  <action name="actionwt144">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>  wt144 </string>
+   </property>
+   <property name="toolTip">
+    <string>Select wt144</string>
    </property>
   </action>
  </widget>

@@ -18,6 +18,11 @@ MainWindow::MainWindow(QWidget *parent) :
     group->addAction(ui->actionSatoshi);
     group->addAction(ui->actionEDA);
     group->addAction(ui->actionNeil);
+    group->addAction(ui->actiondEDA);
+    group->addAction(ui->actiondEDAmodTom);
+    group->addAction(ui->actionDeadalnix);
+    group->addAction(ui->actioncw144);
+    group->addAction(ui->actionwt144);
     ui->actionSatoshi->setChecked(true);
 
     connect(ui->actionNew_Miner, SIGNAL(triggered(bool)), this, SLOT(addMiner()));
@@ -61,11 +66,30 @@ void MainWindow::newBlockFound(int height)
 void MainWindow::algoChanged()
 {
     Chain::AdjustmentAlgorithm algo;
-    if (ui->actionSatoshi->isChecked())
+    if (ui->actionSatoshi->isChecked()){
         algo = Chain::Satoshi;
-    else if (ui->actionEDA->isChecked())
+        ui->label_Algo->setText("Satoshi");
+    }else if (ui->actionEDA->isChecked()){
         algo = Chain::EDA;
-    else
+        ui->label_Algo->setText("EDA");
+    }else if (ui->actionNeil->isChecked()){
         algo = Chain::Neil;
+        ui->label_Algo->setText("Neil");
+    }else if (ui->actiondEDA->isChecked()){
+        algo = Chain::dEDA;
+        ui->label_Algo->setText("dualEDA");
+    }else if (ui->actiondEDAmodTom->isChecked()){
+        algo = Chain::dEDAmodTom;
+        ui->label_Algo->setText("dualEDAmod");
+    }else if (ui->actionDeadalnix->isChecked()){
+        algo = Chain::Deadalnix;
+        ui->label_Algo->setText("Deadalnix");
+    }else if (ui->actioncw144->isChecked()){
+        algo = Chain::cw144;
+        ui->label_Algo->setText("cw144");
+    }else if (ui->actionwt144->isChecked()){
+        algo = Chain::wt144;
+        ui->label_Algo->setText("wt144");
+    }
     m_chain.setAdjustmentAlgorithm(algo);
 }
