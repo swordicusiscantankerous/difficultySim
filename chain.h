@@ -15,7 +15,10 @@ public:
         EDA,
         Neil,
         dEDA,
-        dEDAmodTom
+        dEDAmodTom,
+        Deadalnix,
+        cw144,
+        wt144
     };
     explicit Chain(QObject *parent = nullptr);
 
@@ -41,9 +44,14 @@ private slots:
 
 private:
     int neilsAlgo() const;
-
+    int deadalnixAlgo() const;//
+    int cw144Algo() const;//
+    int wt144Algo() const;//
+    
     QList<Miner*> m_miners;
     QList<qint64> m_blockTimeStamps;
+    QList<int> m_blockDifficulties;/////wt-144
+    //QList<qint64> m_blockDifficulties;/////wt-144
     qint64 m_timeLastPeriodStart;
     qint64 m_pauseStart;
 
