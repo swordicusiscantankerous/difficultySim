@@ -20,7 +20,6 @@ MainWindow::MainWindow(QWidget *parent) :
     group->addAction(ui->actionNeil);
     group->addAction(ui->actiondEDA);
     group->addAction(ui->actiondEDAmodTom);
-    group->addAction(ui->actionDeadalnix_144);
     group->addAction(ui->actionDeadalnix);
     group->addAction(ui->actioncw144);
     group->addAction(ui->actionwt144);
@@ -75,7 +74,7 @@ void MainWindow::algoChanged()
         ui->label_Algo->setText("EDA (Deadalnix)");
     }else if (ui->actionNeil->isChecked()){
         algo = Chain::Neil;
-        ui->label_Algo->setText("Neil");
+        ui->label_Algo->setText("k-1 (Neil)");
     }else if (ui->actiondEDA->isChecked()){
         algo = Chain::dEDA;
         ui->label_Algo->setText("dualEDA");
@@ -83,17 +82,14 @@ void MainWindow::algoChanged()
         algo = Chain::dEDAmodTom;
         ui->label_Algo->setText("dualEDAmod");
     }else if (ui->actionDeadalnix->isChecked()){
-        algo = Chain::Deadalnix;
+        algo = Chain::DeadalnixOld;
         ui->label_Algo->setText("Deadalnix (old)");
     }else if (ui->actioncw144->isChecked()){
         algo = Chain::cw144;
-        ui->label_Algo->setText("cw144");
+        ui->label_Algo->setText("cw144 (Deadalnix)");
     }else if (ui->actionwt144->isChecked()){
         algo = Chain::wt144;
-        ui->label_Algo->setText("wt144");
-    } else if (ui->actionDeadalnix_144->isChecked()){
-        algo = Chain::wt144;
-        ui->label_Algo->setText("Deadalnix 144");
+        ui->label_Algo->setText("wt144 (TomH)");
     }
     m_chain.setAdjustmentAlgorithm(algo);
 }

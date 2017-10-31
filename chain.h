@@ -17,7 +17,6 @@ public:
         Neil,
         dEDA,
         dEDAmodTom,
-        Deadalnix,
         cw144,
         wt144
     };

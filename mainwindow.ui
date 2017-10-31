@@ -154,7 +154,6 @@
     <addaction name="actionNeil"/>
     <addaction name="actioncw144"/>
     <addaction name="actionwt144"/>
-    <addaction name="actionDeadalnix_144"/>
    </widget>
    <addaction name="menuSimulation"/>
    <addaction name="menuOptions"/>
@@ -268,7 +267,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>&amp;cw144 </string>
+    <string>&amp;cw144  (deadalnix)</string>
    </property>
    <property name="toolTip">
     <string>Select cw144</string>
@@ -283,17 +282,6 @@
    </property>
    <property name="toolTip">
     <string>Select wt144</string>
-   </property>
-  </action>
-  <action name="actionDeadalnix_144">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Deadalnix-144</string>
-   </property>
-   <property name="toolTip">
-    <string>Select Deadalnix's new 144 algo</string>
    </property>
   </action>
  </widget>

@@ -123,8 +123,6 @@ void Chain::addBlock(int height)
         int newDifficulty = 0;
         if (m_algo == Neil)
             newDifficulty = neilsAlgo();
-        else if (m_algo == Deadalnix)
-            newDifficulty = deadalnixAlgo2();
         else if (m_algo == DeadalnixOld)
             newDifficulty = deadalnixAlgo();
         else if (m_algo == cw144)
@@ -192,29 +190,6 @@ int Chain::neilsAlgo() const
 
     // We can't go below the minimum target
     return std::max(newDifficulty, ProofOfWorkLimit);
-}
-
-int Chain::deadalnixAlgo2() const
-{
-    const int ProofOfWorkLimit = 1000;
-    if (m_height <= 145)
-        return ProofOfWorkLimit;
-
-    const int targetTimeSpan = 600 * 1000 / 6000; // we aim to be a 6000 times faster than real-time.
-
-    // 144 blocks sliding window. Tip-1 till Tip-145
-    // difficulty;
-    int difficulty = 0;
-    for (int i = 1; i <= 145; i++) {
-        difficulty += m_blockDifficulties.at(m_blockDifficulties.size() - i - 1);
-    }
-    // time
-    int timeElapsed = m_blockTimeStamps.at(m_blockTimeStamps.size() - 2) - m_blockTimeStamps.at(m_blockTimeStamps.size() - 146);
-    timeElapsed = qBound(72 * targetTimeSpan, timeElapsed, 288 * targetTimeSpan);
-
-    int newDifficulty = difficulty * targetTimeSpan / timeElapsed;
-
-    return newDifficulty;
 }
 
 int Chain::deadalnixAlgo() const //work in progress
@@ -289,7 +264,7 @@ int Chain::deadalnixAlgo() const //work in progress
 
 int Chain::cw144Algo() const //work in progress
 {
-    const qint64 targetTimeSpan = 144 * 600 * 1000 / 6000; // we aim to be a 6000 times faster than real-time.
+    const qint64 targetTimeSpan = 600 * 1000 / 6000; // we aim to be a 6000 times faster than real-time.
     const int ProofOfWorkLimit = 1000;
     // First 144 blocks have genesis block difficulty
     if (m_height <= 147)
@@ -298,12 +273,13 @@ int Chain::cw144Algo() const //work in progress
     const qint64 last_timestamp = m_blockTimeStamps.at(m_blockTimeStamps.count() - 2);
     qint64 target_144 = 0;
     for (int i=0; i<144; i++) {
-        const qint64 target_i = m_blockDifficulties.at(m_blockDifficulties.count() - 146 + i);
+        const int target_i = m_blockDifficulties.at(m_blockDifficulties.count() - 146 + i);
         target_144 = target_144 + target_i;
     }
     target_144 = target_144 / 144;
-    const qint64 timeSpan144 = last_timestamp - first_timestamp;
-    int newDifficulty = target_144 * targetTimeSpan / timeSpan144;
+    qint64 timeSpan144 = last_timestamp - first_timestamp;
+    timeSpan144 = qBound(72 * targetTimeSpan, timeSpan144, 288 * targetTimeSpan);
+    int newDifficulty = target_144 * 144 * targetTimeSpan / timeSpan144;
     // We can't go below the minimum target
     return std::max(newDifficulty, ProofOfWorkLimit);
 }
