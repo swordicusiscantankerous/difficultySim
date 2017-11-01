@@ -89,10 +89,10 @@ void Chain::addBlock(int height)
             qint64 mtpTip = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7);
             qint64 mtpTipMinus6 = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7 - 6);
             int tmpemergency = m_emergencyCount;
-            if (mtpTip - mtpTipMinus6 > 6 * 600 * 12 * 1000 / 6000) {//1st downward //12 hour blocks
+            if (mtpTip - mtpTipMinus6 > 6 * 12 * 600 * 1000 / 6000) {//1st downward //12 hours blocks
                 m_emergencyCount++;
             }
-            if (mtpTip - mtpTipMinus6 < 600 * 1000 / 6000 && m_emergencyCount > 0) {//2nd upward //10 min blocks
+            if (mtpTip - mtpTipMinus6 < 8 / 10 * 6 * 600 * 1000 / 6000 && m_emergencyCount > 0) {//2nd upward //8 min blocks
                 m_emergencyCount--;
             }
             if (tmpemergency != m_emergencyCount) {
@@ -105,10 +105,10 @@ void Chain::addBlock(int height)
             qint64 mtpTip = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7);
             qint64 mtpTipMinus6 = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7 - 6);
             int tmpemergency = m_emergencyCount;
-            if (mtpTip - mtpTipMinus6 > 6 * 12 * 600 * 1000 / 6000) {//1st downward //12 hour blocks
+            if (mtpTip - mtpTipMinus6 > 6 * 12 * 600 * 1000 / 6000) {//1st downward //12 hours past
                 m_emergencyCount++;
             }
-            if (mtpTip - mtpTipMinus6 < 600 * 1000 / 6000) {//2nd upward //10 min blocks allow above baseline adj
+            if (mtpTip - mtpTipMinus6 < 8 / 10 * 6 * 600 * 1000 / 6000) {//2nd upward //8 min blocks allow above baseline adj
                 m_emergencyCount--;
             }
             if (tmpemergency != m_emergencyCount) {
