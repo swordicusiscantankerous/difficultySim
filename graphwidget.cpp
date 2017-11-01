@@ -96,7 +96,7 @@ void GraphWidget::paintEvent(QPaintEvent *)
     painter.fillRect(0, 0, width(), height(), Qt::white);
     QMatrix matrix;
     matrix.translate(0, height());
-    matrix.scale(0.5 * m_pixelsPerSecond, -height() / 8000.);
+    matrix.scale(0.5 * m_pixelsPerSecond, -height() / 800.);
     painter.setRenderHint(QPainter::Antialiasing);
 
     const qint64 now = QDateTime::currentMSecsSinceEpoch();
@@ -113,7 +113,7 @@ void GraphWidget::paintEvent(QPaintEvent *)
     const int fontHeight = painter.fontMetrics().xHeight();
     if (!m_blocksFoundGraph.isEmpty()) {
         QMatrix m2(modelToViewMatrix);
-        m2.scale(1, 120);
+        m2.scale(1, 30);
 
         if (!m_blocksFoundAverageGraph.isEmpty()) {
             QPolygonF graph(m_blocksFoundAverageGraph);
@@ -139,23 +139,35 @@ void GraphWidget::paintEvent(QPaintEvent *)
             painter.drawPolygon(m2.map(graph));
         }
 
-        painter.setPen(QPen(QColor(153, 38, 40), 2));
-        painter.drawPoints(m2.map(m_blocksFoundGraph));
+        if (m_pixelsPerSecond > 1.5) {
+            painter.setPen(QPen(QColor(153, 38, 40), 2));
+            painter.drawPoints(m2.map(m_blocksFoundGraph));
+        }
 
         m2 = QMatrix(matrix); // skip the offset in time.
-        m2.scale(1, 120);
+        m2.scale(1, 30);
         painter.setPen(QPen(Qt::red, 1, Qt::DashDotDotLine));
-        const QPointF tenBPS = m2.map(QPointF(0, 6));
-        painter.drawLine(0, tenBPS.y(), width(), tenBPS.y()); // 6 blocks per hour
+        const QPointF sixBPH = m2.map(QPointF(0, 6));
+        painter.drawLine(0, sixBPH.y(), width(), sixBPH.y()); // 6 blocks per hour
         painter.setPen(Qt::black);
-        painter.drawText(QPoint(10, -1) + m2.map(QPointF(0, 6)), "10-minute-block");
+        painter.drawText(QPoint(10, -1) + sixBPH, "10 min/block");
+
+        const QPointF slowBlock = m2.map(QPointF(0, 60 / 20)); // 20 minutes block
+        const QPointF fastBlock = m2.map(QPointF(0, 60 / 5)); // 5 minutes block
+        painter.drawText(QPoint(10, 5) + slowBlock, "20 min/block");
+        painter.drawText(QPoint(10, 5) + fastBlock, "5 min/block");
+        painter.setPen(Qt::gray);
+        painter.drawLine(0, slowBlock.y(), 10, slowBlock.y());
+        painter.drawLine(0, fastBlock.y(), 10, fastBlock.y());
     }
 
     if (!m_difficultyGraph.isEmpty()) {
+        QMatrix m2 = QMatrix(modelToViewMatrix);
+        m2.scale(1, 1/200.);
         painter.setPen(QPen(difficultyColor));
         QPolygonF graph(m_difficultyGraph);
         graph.append(QPointF(relativeTime / 500, graph.last().y()));
-        painter.drawPolyline(modelToViewMatrix.map(graph));
+        painter.drawPolyline(m2.map(graph));
     }
 
     if (!m_hashrateGraph.isEmpty()) {
@@ -163,7 +175,7 @@ void GraphWidget::paintEvent(QPaintEvent *)
         QPolygonF graph(m_hashrateGraph);
         graph.append(QPointF(relativeTime / 500, graph.last().y()));
         QMatrix m2(modelToViewMatrix);
-        m2.scale(1, 6);
+        m2.scale(1, 0.5);
         painter.drawPolyline(m2.map(graph));
     }
 

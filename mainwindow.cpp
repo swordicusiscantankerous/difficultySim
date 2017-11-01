@@ -23,7 +23,6 @@ MainWindow::MainWindow(QWidget *parent) :
     group->addAction(ui->actionDeadalnix);
     group->addAction(ui->actioncw144);
     group->addAction(ui->actionwt144);
-    // group->setExclusive(true);
     ui->actionSatoshi->setChecked(true);
 
     connect(ui->actionNew_Miner, SIGNAL(triggered(bool)), this, SLOT(addMiner()));
@@ -40,7 +39,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (ui->zoomLevel, SIGNAL(valueChanged(int)), ui->graphsFrame, SLOT(setGraphZoom(int)));
     connect (group, SIGNAL(triggered(QAction*)), this, SLOT(algoChanged()));
 
-    addMiner();
+    addMiner(100);
+    addMiner(120);
 }
 
 MainWindow::~MainWindow()
@@ -48,9 +48,10 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::addMiner()
+void MainWindow::addMiner(int strength)
 {
     Miner *miner = m_chain.appendNewMiner();
+    miner->setHashPower(strength);
     MinerWidget *widget = new MinerWidget(miner, ui->minersForm);
     m_minersLayout->insertWidget(m_minersLayout->count() - 1, widget);
     connect (widget, SIGNAL(deletePressed(Miner*)), &m_chain, SLOT(deleteMiner(Miner*)));
@@ -70,10 +71,10 @@ void MainWindow::algoChanged()
         ui->label_Algo->setText("Satoshi");
     }else if (ui->actionEDA->isChecked()){
         algo = Chain::EDA;
-        ui->label_Algo->setText("EDA");
+        ui->label_Algo->setText("EDA (Deadalnix)");
     }else if (ui->actionNeil->isChecked()){
         algo = Chain::Neil;
-        ui->label_Algo->setText("Neil");
+        ui->label_Algo->setText("k-1 (Neil)");
     }else if (ui->actiondEDA->isChecked()){
         algo = Chain::dEDA;
         ui->label_Algo->setText("dualEDA");
@@ -81,14 +82,14 @@ void MainWindow::algoChanged()
         algo = Chain::dEDAmodTom;
         ui->label_Algo->setText("dualEDAmod");
     }else if (ui->actionDeadalnix->isChecked()){
-        algo = Chain::Deadalnix;
-        ui->label_Algo->setText("Deadalnix");
+        algo = Chain::DeadalnixOld;
+        ui->label_Algo->setText("Deadalnix (old)");
     }else if (ui->actioncw144->isChecked()){
         algo = Chain::cw144;
-        ui->label_Algo->setText("cw144");
+        ui->label_Algo->setText("cw144 (Deadalnix)");
     }else if (ui->actionwt144->isChecked()){
         algo = Chain::wt144;
-        ui->label_Algo->setText("wt144");
+        ui->label_Algo->setText("wt144 (TomH)");
     }
     m_chain.setAdjustmentAlgorithm(algo);
 }

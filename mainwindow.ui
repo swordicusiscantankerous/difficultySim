@@ -140,12 +140,18 @@
     <property name="title">
      <string>Optio&amp;ns</string>
     </property>
+    <widget class="QMenu" name="menuOld">
+     <property name="title">
+      <string>Old</string>
+     </property>
+     <addaction name="actionDeadalnix"/>
+     <addaction name="actiondEDA"/>
+     <addaction name="actiondEDAmodTom"/>
+    </widget>
+    <addaction name="menuOld"/>
     <addaction name="actionSatoshi"/>
     <addaction name="actionEDA"/>
     <addaction name="actionNeil"/>
-    <addaction name="actiondEDA"/>
-    <addaction name="actiondEDAmodTom"/>
-    <addaction name="actionDeadalnix"/>
     <addaction name="actioncw144"/>
     <addaction name="actionwt144"/>
    </widget>
@@ -195,7 +201,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string> EDA (deadalnix)</string>
+    <string>&amp;EDA (deadalnix)</string>
    </property>
    <property name="toolTip">
     <string>Enable the Emergency Difficulty Adjustment</string>
@@ -206,7 +212,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Neil</string>
+    <string>&amp;Neil</string>
    </property>
    <property name="toolTip">
     <string>Select the new Algorithm</string>
@@ -217,7 +223,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Satoshi</string>
+    <string>&amp;Satoshi</string>
    </property>
    <property name="toolTip">
     <string>Select the original algorithm</string>
@@ -228,7 +234,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string> dEDA </string>
+    <string>&amp;dEDA </string>
    </property>
    <property name="toolTip">
     <string>Select dualEDAv1</string>
@@ -239,7 +245,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string> dEDAmodTom </string>
+    <string>dEDA&amp;modTom </string>
    </property>
    <property name="toolTip">
     <string>Select dualEDAmodTom</string>
@@ -250,7 +256,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>  Deadalnix </string>
+    <string>Deada&amp;lnix </string>
    </property>
    <property name="toolTip">
     <string>Select Deadalnix</string>
@@ -261,7 +267,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>  cw144 </string>
+    <string>&amp;cw144  (deadalnix)</string>
    </property>
    <property name="toolTip">
     <string>Select cw144</string>
@@ -272,7 +278,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>  wt144 </string>
+    <string>&amp;wt144 </string>
    </property>
    <property name="toolTip">
     <string>Select wt144</string>

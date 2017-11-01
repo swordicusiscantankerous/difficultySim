@@ -47,7 +47,7 @@ void Chain::addBlock(int height)
     m_height = height;
     if (m_height == 0) {
         m_timeLastPeriodStart = now;
-        m_baseDifficulty = m_difficulty = 1000;
+        m_baseDifficulty = m_difficulty = 20000;
         return;
     }
     emit newBlock(m_height);
@@ -56,6 +56,7 @@ void Chain::addBlock(int height)
         qDebug() << QTime::currentTime().toString() << m_height << "@" << m_difficulty;
 
     if (m_algo == Satoshi || m_algo == EDA || m_algo == dEDA || m_algo == dEDAmodTom) {
+        m_blockDifficulties.append(m_difficulty);
         if (m_height % 2016 == 0) {
             const qint64 targetTimeSpan = 2016 * 600 * 1000 / 6000; // we aim to be a 6000 times faster than real-time.
             // recalculate base difficulty.
@@ -116,33 +117,21 @@ void Chain::addBlock(int height)
             }
         }
     }
-    else if (m_algo == Neil) {
+    else {
         m_blockTimeStamps.append(now);
-        int newDifficulty = neilsAlgo();
-        if (newDifficulty != m_difficulty) {
-            m_difficulty = newDifficulty;
-            emit difficultyChanged(m_difficulty);
-        }
-    }else if (m_algo == Deadalnix) {
-        m_blockTimeStamps.append(now);
-        m_blockDifficulties.append(m_difficulty); //
-        int newDifficulty = deadalnixAlgo();
-        if (newDifficulty != m_difficulty) {
-            m_difficulty = newDifficulty;
-            emit difficultyChanged(m_difficulty);
-        }
-    }else if (m_algo == cw144) {
-        m_blockTimeStamps.append(now);
-        m_blockDifficulties.append(m_difficulty); //
-        int newDifficulty = cw144Algo();
-        if (newDifficulty != m_difficulty) {
-            m_difficulty = newDifficulty;
-            emit difficultyChanged(m_difficulty);
-        }
-    }else if (m_algo == wt144) {
-        m_blockTimeStamps.append(now);
-        m_blockDifficulties.append(m_difficulty); //
-        int newDifficulty = wt144Algo();
+        m_blockDifficulties.append(m_difficulty);
+        int newDifficulty = 0;
+        if (m_algo == Neil)
+            newDifficulty = neilsAlgo();
+        else if (m_algo == DeadalnixOld)
+            newDifficulty = deadalnixAlgo();
+        else if (m_algo == cw144)
+            newDifficulty = cw144Algo();
+        else if (m_algo == wt144)
+            newDifficulty = wt144Algo();
+        else
+            Q_ASSERT(false);
+
         if (newDifficulty != m_difficulty) {
             m_difficulty = newDifficulty;
             emit difficultyChanged(m_difficulty);
@@ -271,12 +260,11 @@ int Chain::deadalnixAlgo() const //work in progress
     //qDebug() << "  " << newDifficulty;
     // We can't go below the minimum target
     return std::max(newDifficulty, ProofOfWorkLimit);
-    
 }
 
 int Chain::cw144Algo() const //work in progress
 {
-    const qint64 targetTimeSpan = 144 * 600 * 1000 / 6000; // we aim to be a 6000 times faster than real-time.
+    const qint64 targetTimeSpan = 600 * 1000 / 6000; // we aim to be a 6000 times faster than real-time.
     const int ProofOfWorkLimit = 1000;
     // First 144 blocks have genesis block difficulty
     if (m_height <= 147)
@@ -285,12 +273,13 @@ int Chain::cw144Algo() const //work in progress
     const qint64 last_timestamp = m_blockTimeStamps.at(m_blockTimeStamps.count() - 2);
     qint64 target_144 = 0;
     for (int i=0; i<144; i++) {
-        const qint64 target_i = m_blockDifficulties.at(m_blockDifficulties.count() - 146 + i);
+        const int target_i = m_blockDifficulties.at(m_blockDifficulties.count() - 146 + i);
         target_144 = target_144 + target_i;
     }
     target_144 = target_144 / 144;
-    const qint64 timeSpan144 = last_timestamp - first_timestamp;
-    int newDifficulty = target_144 * targetTimeSpan / timeSpan144;
+    qint64 timeSpan144 = last_timestamp - first_timestamp;
+    timeSpan144 = qBound(72 * targetTimeSpan, timeSpan144, 288 * targetTimeSpan);
+    int newDifficulty = target_144 * 144 * targetTimeSpan / timeSpan144;
     // We can't go below the minimum target
     return std::max(newDifficulty, ProofOfWorkLimit);
 }
@@ -379,7 +368,7 @@ void Chain::doMine()
     if (hashPower == 0 || m_pauseStart)
         return;
 
-    double timeTillNextBlock = 20 * m_difficulty / hashPower;
+    double timeTillNextBlock = m_difficulty / hashPower;
     double sample = (qrand() % (int) 1E6) / 1E6;
     double lambda = 1 / timeTillNextBlock;
     int sleep = 0.5 + log(1. - sample) / -lambda;
