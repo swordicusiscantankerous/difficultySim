@@ -13,6 +13,7 @@ public slots:
     void setDifficulty(int difficulty);
     void setHashrate(int hashrate);
     void addBlock();
+    void addMarker();//
     void pause();
     void setGraphZoom(int zoom);
 
@@ -25,6 +26,7 @@ private:
     QPolygonF m_hashrateGraph;
     QPolygonF m_blocksFoundGraph;
     QPolygonF m_blocksFoundAverageGraph;
+    QPolygonF m_MarkersGraph;
     // QPainterPath m_blocksFound;
     qint64 m_startTime;
     qint64 m_pauseStart;

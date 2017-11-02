@@ -16,9 +16,11 @@ public:
         DeadalnixOld,
         Neil,
         dEDA,
-        dEDAmodTom,
+        dEDAnobaseline,
         cw144,
-        wt144
+        wt144,
+        wt155log,
+        dualEDA126blocks
     };
     explicit Chain(QObject *parent = nullptr);
 
@@ -30,6 +32,7 @@ public:
 signals:
     void difficultyChanged(int newDifficulty);
     void newBlock(int height);
+    void newMarker();
     void hashpowerChanged(int hashPower);
 
 public slots:
@@ -48,12 +51,16 @@ private:
     int deadalnixAlgo2() const; // the one he announced on the 27th of Oct.
     int cw144Algo() const;
     int wt144Algo() const;
+    int dualEDA126Algo();
     
     QList<Miner*> m_miners;
     QList<qint64> m_blockTimeStamps;
     QList<int> m_blockDifficulties;  // wt-144
+    QList<int> m_blockDiffs_126; //dualEDA126blocks
+    long cumdiff_126; //dualEDA126blocks
     qint64 m_timeLastPeriodStart;
     qint64 m_pauseStart;
+    
 
     int m_difficulty;
     int m_baseDifficulty;

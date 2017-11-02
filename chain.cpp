@@ -13,7 +13,8 @@ Chain::Chain(QObject *parent) : QObject(parent),
     m_emergencyCount(0),
     //m_index144(0),//144
     m_height(-1),
-    m_timer(new QTimer(this))
+    m_timer(new QTimer(this)),
+    cumdiff_126(0)
 {
     addBlock(0); // genesis
     m_timer->setSingleShot(true);
@@ -55,15 +56,16 @@ void Chain::addBlock(int height)
     if (m_height  % 500 == 0)
         qDebug() << QTime::currentTime().toString() << m_height << "@" << m_difficulty;
 
-    if (m_algo == Satoshi || m_algo == EDA || m_algo == dEDA || m_algo == dEDAmodTom) {
+    if (m_algo == Satoshi || m_algo == EDA || m_algo == dEDA || m_algo == dEDAnobaseline) {
         m_blockDifficulties.append(m_difficulty);
         if (m_height % 2016 == 0) {
+            emit newMarker();
             const qint64 targetTimeSpan = 2016 * 600 * 1000 / 6000; // we aim to be a 6000 times faster than real-time.
             // recalculate base difficulty.
             qint64 actualTimeSpan = now - m_timeLastPeriodStart;
             qDebug() << "Period completed. Wanted time:" << targetTimeSpan << "took:" << actualTimeSpan;
             actualTimeSpan = qBound(targetTimeSpan / 4, actualTimeSpan, targetTimeSpan * 4);
-            if(m_algo == dEDA || m_algo == dEDAmodTom){/////////dEDA////////dEDAmodTom
+            if(m_algo == dEDA || m_algo == dEDAnobaseline){/////////dEDA////////dEDAnobaseline
                 m_emergencyCount = 0;
             }
             m_baseDifficulty = m_baseDifficulty * targetTimeSpan / actualTimeSpan;
@@ -89,11 +91,11 @@ void Chain::addBlock(int height)
             qint64 mtpTip = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7);
             qint64 mtpTipMinus6 = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7 - 6);
             int tmpemergency = m_emergencyCount;
-            if (mtpTip - mtpTipMinus6 > 6 * 12 * 600 * 1000 / 6000) {//1st downward //12 hours blocks
-                m_emergencyCount++;
+            if (mtpTip - mtpTipMinus6 > 6 * 12 * 600 * 1000 / 6000) {//1st downward
+                m_emergencyCount++;     // 6 blocks ago is 12 hours in the past
             }
-            if (mtpTip - mtpTipMinus6 < 8 / 10 * 6 * 600 * 1000 / 6000 && m_emergencyCount > 0) {//2nd upward //8 min blocks
-                m_emergencyCount--;
+            if (mtpTip - mtpTipMinus6 < 6 / 2 * 600 * 1000 / 6000 && m_emergencyCount > 0) {//2nd upward
+                m_emergencyCount--;     // 6 blocks ago is 30 minutes in the past
             }
             if (tmpemergency != m_emergencyCount) {
                 m_difficulty = qRound(m_baseDifficulty * pow(0.8, m_emergencyCount));// base * (.8)^eda
@@ -101,15 +103,15 @@ void Chain::addBlock(int height)
             }
         }
         /////////dualEDA modification of Tom's algo: base pow(0.8, n)/////////////
-        if (m_algo == dEDAmodTom && m_blockTimeStamps.length() > 12) {//////dualEDAmodTom pow(0.8, n) + emergencyUP
+        if (m_algo == dEDAnobaseline && m_blockTimeStamps.length() > 12) {//////dualEDAmodTom pow(0.8, n) + emergencyUP
             qint64 mtpTip = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7);
             qint64 mtpTipMinus6 = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7 - 6);
             int tmpemergency = m_emergencyCount;
-            if (mtpTip - mtpTipMinus6 > 6 * 12 * 600 * 1000 / 6000) {//1st downward //12 hours past
-                m_emergencyCount++;
+            if (mtpTip - mtpTipMinus6 > 6 * 12 * 600 * 1000 / 6000) {//1st downward
+                m_emergencyCount++;     // 6 blocks ago is 12 hours in the past
             }
-            if (mtpTip - mtpTipMinus6 < 8 / 10 * 6 * 600 * 1000 / 6000) {//2nd upward //8 min blocks allow above baseline adj
-                m_emergencyCount--;
+            if (mtpTip - mtpTipMinus6 < 6 / 2 * 600 * 1000 / 6000) {//2nd upward blocks allow above baseline adj
+                m_emergencyCount--;     // 6 blocks ago is 30 minutes in the past
             }
             if (tmpemergency != m_emergencyCount) {
                 m_difficulty = qRound( m_baseDifficulty * pow(0.8, m_emergencyCount));// base * (.8)^eda
@@ -129,6 +131,8 @@ void Chain::addBlock(int height)
             newDifficulty = cw144Algo();
         else if (m_algo == wt144)
             newDifficulty = wt144Algo();
+        else if (m_algo == dualEDA126blocks)
+            newDifficulty = dualEDA126Algo();
         else
             Q_ASSERT(false);
 
@@ -307,6 +311,68 @@ int Chain::wt144Algo() const
     int newDifficulty = target_144 * targetTimeSpan / timeSpan144;
     // We can't go below the minimum target
     return std::max(newDifficulty, ProofOfWorkLimit);
+}
+
+
+int Chain::dualEDA126Algo() // 16 weighted 126 block groups = 2016 blocks
+{
+    qDebug() << "dualEDA126Algo " << QTime::currentTime().toString() << m_height << "@" << m_difficulty;
+    const qint64 now = QDateTime::currentMSecsSinceEpoch();
+    const int ProofOfWorkLimit = 500;
+    int newDifficulty = m_difficulty;
+    if (m_height < 13)
+        return newDifficulty;
+    if (m_height % 126 == 0) {// 2016 ÷ 16
+        emit newMarker();
+        const qint64 targetTimeSpan_126 = 126 * 600 * 1000 / 6000; // we aim to be a 6000 times faster than real-time.
+        const qint64 targetTimeSpan_2016 = 2016 * 600 * 1000 / 6000;
+        qint64 timeSpan_126 = now - m_timeLastPeriodStart;
+        m_timeLastPeriodStart = now;
+        //qint64 timeSpan_126 = now - m_blockTimeStamps.at(m_blockTimeStamps.count() - 126);
+        m_emergencyCount = 0;
+        newDifficulty = cumdiff_126 / 19 * targetTimeSpan_126 / timeSpan_126;
+        cumdiff_126 = 0;
+        if (m_height > 2016) {// time stabiliser
+            //qint elapsedTimeSpan = now - m_blockTimeStamps.at(m_blockTimeStamps.count() - 2016);
+            //elapsedTimeSpan = qBound(16 * targetTimeSpan_126 / 4, elapsedTimeSpan, 16 * targetTimeSpan_126 * 4);
+            qint64 timeSpan_2016 = 0;
+            qint64 prior_timestamp = m_blockTimeStamps.at(m_blockTimeStamps.count() - 2016 - 126);
+            qint64 target_2016 = 0;
+            for (int i=0; i<16; i++) {
+                const qint64 target_i = m_blockDiffs_126.at(m_blockDiffs_126.count() - 16 + i);
+                const qint64 time_i = m_blockTimeStamps.at(m_blockTimeStamps.count() - 2016 + i);
+                const qint64 d_time = time_i - prior_timestamp;
+                prior_timestamp = time_i;
+                timeSpan_2016 = timeSpan_2016 + d_time * (i + 1);
+                target_2016 = target_2016 + target_i;
+            }
+            target_2016 = target_2016 / 16;
+            timeSpan_2016 = timeSpan_2016 * 2 / (16 * 16 + 16) * 16;
+            timeSpan_2016 = qBound(16 * targetTimeSpan_126 / 4, timeSpan_2016, 16 * targetTimeSpan_126 * 4);
+            newDifficulty = target_2016 * targetTimeSpan_2016 / timeSpan_2016;
+        }
+        m_blockDiffs_126.append(newDifficulty);
+        return std::max(newDifficulty, ProofOfWorkLimit);
+    }
+    if (m_height % 126 >= 13 && ((m_height % 126) % 6 == 1)) {// dualEDA 126 ÷ 6 = 21 - 2 = 19 rounds
+        qint64 mtpTip = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7);
+        qint64 mtpTipMinus6 = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7 - 6);
+        int tmpemergency = m_emergencyCount;
+        if (mtpTip - mtpTipMinus6 > 6 * 12 * 600 * 1000 / 6000) {// 1st downward
+            m_emergencyCount++;     // 6 blocks ago is 12 hours in the past
+            //cumdiff_126 = cumdiff_126 + newDifficulty;// add old difficulty to cum-diff
+            newDifficulty = qRound( newDifficulty * pow(0.9, m_emergencyCount));// base * (.9)^eda
+            cumdiff_126 = cumdiff_126 + newDifficulty;// add new difficulty to cum-diff
+        }else if (mtpTip - mtpTipMinus6 < 6 / 2 * 600 * 1000 / 6000) {// 2nd upward //allow above baseline adj
+            m_emergencyCount--;     // 6 blocks ago is 30 minutes in the past
+            newDifficulty = qRound( newDifficulty * pow(0.9, m_emergencyCount));// base * (.9)^eda
+            cumdiff_126 = cumdiff_126 + newDifficulty;// add new difficulty to cum-diff
+        }else{
+            cumdiff_126 = cumdiff_126 + newDifficulty;
+        }
+        return std::max(newDifficulty, ProofOfWorkLimit);
+    }
+    return newDifficulty;
 }
 
 Miner *Chain::appendNewMiner()

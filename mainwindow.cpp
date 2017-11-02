@@ -19,10 +19,11 @@ MainWindow::MainWindow(QWidget *parent) :
     group->addAction(ui->actionEDA);
     group->addAction(ui->actionNeil);
     group->addAction(ui->actiondEDA);
-    group->addAction(ui->actiondEDAmodTom);
+    group->addAction(ui->actiondEDAnobaseline);
     group->addAction(ui->actionDeadalnix);
     group->addAction(ui->actioncw144);
     group->addAction(ui->actionwt144);
+    group->addAction(ui->actiondualEDA126blocks);
     ui->actionSatoshi->setChecked(true);
 
     connect(ui->actionNew_Miner, SIGNAL(triggered(bool)), this, SLOT(addMiner()));
@@ -33,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect (&m_chain, SIGNAL(difficultyChanged(int)), ui->graphsFrame, SLOT(setDifficulty(int)));
     connect (&m_chain, SIGNAL(hashpowerChanged(int)), ui->graphsFrame, SLOT(setHashrate(int)));
     connect (&m_chain, SIGNAL(newBlock(int)), ui->graphsFrame, SLOT(addBlock()));
+    connect (&m_chain, SIGNAL(newMarker()), ui->graphsFrame, SLOT(addMarker())); //
     ui->graphsFrame->setDifficulty(m_chain.difficulty());
     setStatusBar(nullptr);
 
@@ -78,9 +80,9 @@ void MainWindow::algoChanged()
     }else if (ui->actiondEDA->isChecked()){
         algo = Chain::dEDA;
         ui->label_Algo->setText("dualEDA");
-    }else if (ui->actiondEDAmodTom->isChecked()){
-        algo = Chain::dEDAmodTom;
-        ui->label_Algo->setText("dualEDAmod");
+    }else if (ui->actiondEDAnobaseline->isChecked()){
+        algo = Chain::dEDAnobaseline;
+        ui->label_Algo->setText("dualEDA no baseline");
     }else if (ui->actionDeadalnix->isChecked()){
         algo = Chain::DeadalnixOld;
         ui->label_Algo->setText("Deadalnix (old)");
@@ -90,6 +92,10 @@ void MainWindow::algoChanged()
     }else if (ui->actionwt144->isChecked()){
         algo = Chain::wt144;
         ui->label_Algo->setText("wt144 (TomH)");
+    }
+    else if (ui->actiondualEDA126blocks->isChecked()){
+        algo = Chain::dualEDA126blocks;
+        ui->label_Algo->setText(" dual EDA 126 blocks");
     }
     m_chain.setAdjustmentAlgorithm(algo);
 }
