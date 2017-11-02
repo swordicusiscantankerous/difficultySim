@@ -29,14 +29,16 @@ SOURCES += \
     miner.cpp \
     chain.cpp \
     minerwidget.cpp \
-    graphwidget.cpp
+    graphwidget.cpp \
+    stats.cpp
 
 HEADERS += \
         mainwindow.h \
     miner.h \
     chain.h \
     minerwidget.h \
-    graphwidget.h
+    graphwidget.h \
+    stats.h
 
 FORMS += \
         mainwindow.ui \

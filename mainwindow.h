@@ -2,9 +2,12 @@
 #define MAINWINDOW_H
 
 #include "chain.h"
+#include "stats.h"
 
 #include <QMainWindow>
 #include <QHBoxLayout>
+
+class QThread;
 
 namespace Ui {
 class MainWindow;
@@ -29,6 +32,9 @@ private:
     QHBoxLayout *m_minersLayout;
 
     Chain m_chain;
+
+    Stats *m_stats;
+    QThread *m_statsThread;
 };
 
 #endif // MAINWINDOW_H

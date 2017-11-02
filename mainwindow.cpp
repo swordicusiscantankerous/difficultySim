@@ -4,10 +4,13 @@
 
 #include <QActionGroup>
 #include <QSlider>
+#include <QThread>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    m_stats(new Stats()),
+    m_statsThread(new QThread(this))
 {
     ui->setupUi(this);
     m_minersLayout = new QHBoxLayout(ui->minersForm);
@@ -25,14 +28,18 @@ MainWindow::MainWindow(QWidget *parent) :
     group->addAction(ui->actionwt144);
     ui->actionSatoshi->setChecked(true);
 
+    m_stats->moveToThread(m_statsThread);
+    m_statsThread->start();
+
     connect(ui->actionNew_Miner, SIGNAL(triggered(bool)), this, SLOT(addMiner()));
     connect (ui->action_Quit, SIGNAL(triggered(bool)), QGuiApplication::instance(), SLOT(quit()));
     connect (ui->action_Pause, SIGNAL(triggered(bool)), &m_chain, SLOT(pause()));
     connect (ui->action_Pause, SIGNAL(triggered(bool)), ui->graphsFrame, SLOT(pause()));
-    connect (&m_chain, SIGNAL(newBlock(int)), this, SLOT(newBlockFound(int)));
+    connect (&m_chain, SIGNAL(newBlock(int,qint64)), this, SLOT(newBlockFound(int)));
     connect (&m_chain, SIGNAL(difficultyChanged(int)), ui->graphsFrame, SLOT(setDifficulty(int)));
     connect (&m_chain, SIGNAL(hashpowerChanged(int)), ui->graphsFrame, SLOT(setHashrate(int)));
-    connect (&m_chain, SIGNAL(newBlock(int)), ui->graphsFrame, SLOT(addBlock()));
+    connect (&m_chain, SIGNAL(newBlock(int,qint64)), ui->graphsFrame, SLOT(addBlock()));
+    connect (&m_chain, SIGNAL(newBlock(int,qint64)), m_stats, SLOT(newBlockFound(int,qint64)));
     ui->graphsFrame->setDifficulty(m_chain.difficulty());
     setStatusBar(nullptr);
 
@@ -46,6 +53,9 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+    m_statsThread->quit();
+    m_statsThread->wait();
+    delete m_stats;
 }
 
 void MainWindow::addMiner(int strength)

@@ -50,7 +50,7 @@ void Chain::addBlock(int height)
         m_baseDifficulty = m_difficulty = 20000;
         return;
     }
-    emit newBlock(m_height);
+    emit newBlock(m_height, now);
 
     if (m_height  % 500 == 0)
         qDebug() << QTime::currentTime().toString() << m_height << "@" << m_difficulty;

@@ -29,7 +29,7 @@ public:
 
 signals:
     void difficultyChanged(int newDifficulty);
-    void newBlock(int height);
+    void newBlock(int height, qint64 timestamp);
     void hashpowerChanged(int hashPower);
 
 public slots:
