@@ -11,10 +11,10 @@ Chain::Chain(QObject *parent) : QObject(parent),
     m_difficulty(-1),
     m_baseDifficulty(-1),
     m_emergencyCount(0),
-    //m_index144(0),//144
     m_height(-1),
-    m_timer(new QTimer(this)),
     cumdiff_126(0)
+    m_algo(Satoshi),
+    m_timer(new QTimer(this))
 {
     addBlock(0); // genesis
     m_timer->setSingleShot(true);
@@ -51,7 +51,7 @@ void Chain::addBlock(int height)
         m_baseDifficulty = m_difficulty = 20000;
         return;
     }
-    emit newBlock(m_height);
+    emit newBlock(m_height, now);
 
     if (m_height  % 500 == 0)
         qDebug() << QTime::currentTime().toString() << m_height << "@" << m_difficulty;
