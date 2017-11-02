@@ -11,8 +11,8 @@ Chain::Chain(QObject *parent) : QObject(parent),
     m_difficulty(-1),
     m_baseDifficulty(-1),
     m_emergencyCount(0),
-    //m_index144(0),//144
     m_height(-1),
+    m_algo(Satoshi),
     m_timer(new QTimer(this))
 {
     addBlock(0); // genesis
