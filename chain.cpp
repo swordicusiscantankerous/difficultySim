@@ -12,7 +12,7 @@ Chain::Chain(QObject *parent) : QObject(parent),
     m_baseDifficulty(-1),
     m_emergencyCount(0),
     m_height(-1),
-    cumdiff_126(0)
+    cumdiff_126(0),
     m_algo(Satoshi),
     m_timer(new QTimer(this))
 {
