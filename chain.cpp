@@ -389,7 +389,7 @@ int Chain::swordcw126fastT() const // 21 constant weight 6 block groups = 126 bl
     if (m_height % 6 == 0 && m_height > 125) {
         const qint64 lasttime_mtp6 = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7);
         const qint64 lasttime126_mtp12 = m_blockTimeStamps.at(m_blockTimeStamps.count() - 126 - 13);
-        const qint64_t timespan21 = lasttime_mtp6 - lasttime126_mtp12;
+        const int64_t timespan21 = lasttime_mtp6 - lasttime126_mtp12;
         qint64 target_21 = 0;
         for (int i=1; i<=21; i++) {
             const qint64 target_i = m_blockDifficulties.at(m_blockDifficulties.count() - 126 - 7 + 6 * i);
