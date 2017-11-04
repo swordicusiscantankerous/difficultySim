@@ -151,6 +151,17 @@ void GraphWidget::paintEvent(QPaintEvent *)
             painter.setPen(QPen(QColor(153, 38, 40), 2));
             painter.drawPoints(m2.map(m_blocksFoundGraph));
         }
+        
+        if (!m_MarkersGraph.isEmpty()) {// add markers // 2016, 504 ...126
+            painter.setPen(QPen(Qt::red, 1, Qt::DashDotDotLine));
+            for (int i=0; i<m_MarkersGraph.count(); i++) {//draw markers as vertical dot line
+                //const QPointF a_marker = QPointF(m_MarkersGraph.at(i).x() - relativeTime / 500, 0);
+                const QPointF a_marker = QPointF(m_MarkersGraph.at(i).x(), 0);
+                //painter.drawLine(m2.map(a_marker.x(), 0, a_marker.x(), height()));
+                const QLineF a_markerline = QLineF(a_marker.x(), 0, a_marker.x(), height());
+                painter.drawLine(m2.map(a_markerline));
+            }
+        }
 
         m2 = QMatrix(matrix); // skip the offset in time.
         m2.scale(1, 30);
@@ -173,14 +184,6 @@ void GraphWidget::paintEvent(QPaintEvent *)
         painter.drawLine(0, fastBlock.y(), 10, fastBlock.y());
         painter.drawLine(0, slowslowBlock.y(), 10, slowslowBlock.y());
         painter.drawLine(0, fastfastBlock.y(), 10, fastfastBlock.y());
-        
-        if (!m_MarkersGraph.isEmpty()) {// add markers // 2016, 504 ...126
-            painter.setPen(QPen(Qt::red, 1, Qt::DashDotDotLine));
-            for (int i=0; i<m_MarkersGraph.count(); i++) {//draw markers as vertical dot line
-                const QPointF a_marker = m2.map(QPointF(m_MarkersGraph.at(i).x(), 0));
-                painter.drawLine(a_marker.x(), 0, a_marker.x(), height());
-            }
-        }
     }
 
     if (!m_difficultyGraph.isEmpty()) {
