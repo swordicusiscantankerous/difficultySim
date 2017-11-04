@@ -105,7 +105,7 @@ void MainWindow::algoChanged()
     }
     else if (ui->actionsword126blocks->isChecked()){
         algo = Chain::sword126blocks;
-        ui->label_Algo->setText(" dual EDA 126 blocks");
+        ui->label_Algo->setText(" sword126blocks");
     }
     m_chain.setAdjustmentAlgorithm(algo);
 }
