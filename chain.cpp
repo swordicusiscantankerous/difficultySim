@@ -282,11 +282,11 @@ int Chain::cw144Algo() const //work in progress
     // First 144 blocks have genesis block difficulty
     if (m_height <= 147)
         return ProofOfWorkLimit;
-    const qint64 first_timestamp = m_blockTimeStamps.at(m_blockTimeStamps.count() - 146);
+    const qint64 first_timestamp = m_blockTimeStamps.at(m_blockTimeStamps.count() - 144 - 3);
     const qint64 last_timestamp = m_blockTimeStamps.at(m_blockTimeStamps.count() - 2);
     qint64 target_144 = 0;
-    for (int i=0; i<144; i++) {
-        const int target_i = m_blockDifficulties.at(m_blockDifficulties.count() - 146 + i);
+    for (int i=1; i<=144; i++) {
+        const int target_i = m_blockDifficulties.at(m_blockDifficulties.count() - 144 - 2 + i);
         target_144 = target_144 + target_i;
     }
     target_144 = target_144 / 144;
@@ -305,11 +305,11 @@ int Chain::wt144Algo() const
     if (m_height <= 147)
         return ProofOfWorkLimit;
     qint64 timeSpan144 = 0;
-    qint64 prior_timestamp = m_blockTimeStamps.at(m_blockTimeStamps.count() - 147);
+    qint64 prior_timestamp = m_blockTimeStamps.at(m_blockTimeStamps.count() - 144 - 3);
     qint64 target_144 = 0;
-    for (int i=0; i<144; i++) {
-        const qint64 target_i = m_blockDifficulties.at(m_blockDifficulties.count() - 146 + i);
-        const qint64 time_i = m_blockTimeStamps.at(m_blockTimeStamps.count() - 146 + i);
+    for (int i=1; i<=144; i++) {
+        const qint64 target_i = m_blockDifficulties.at(m_blockDifficulties.count() - 144 - 2 + i);
+        const qint64 time_i = m_blockTimeStamps.at(m_blockTimeStamps.count() - 144 - 2 + i);
         const qint64 d_time = time_i - prior_timestamp;
         prior_timestamp = time_i;
         timeSpan144 = timeSpan144 + d_time * (i + 1);
