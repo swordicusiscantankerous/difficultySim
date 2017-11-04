@@ -18,7 +18,7 @@ Chain::Chain(QObject *parent) : QObject(parent),
     addBlock(0); // genesis
     m_timer->setSingleShot(true);
     connect (m_timer, SIGNAL(timeout()), this, SLOT(miningSuccessfull()));
-    m_blockDiffs_126.append(20000);
+    m_blockDifficultiescw126.append(20000);
 }
 
 int Chain::difficulty() const
@@ -134,14 +134,14 @@ void Chain::addBlock(int height)
         else if (m_algo == sword126blocks){
             if (m_height % 126 == 0){
                 emit newMarker();
-                newDifficulty = sword126fastT();
+                newDifficulty = swordcw126fastT();
                 if (newDifficulty != 0)
-                    m_blockDiffs_126.append(newDifficulty);
-                newDifficulty = sword126slowT();
+                    m_blockDifficultiescw126.append(newDifficulty);
+                newDifficulty = swordwt126slowT();
                 if (newDifficulty != 0)
                     m_baseDifficulty = newDifficulty;
             }
-            newDifficulty = sword126Algo();
+            newDifficulty = swordwt126Algo();
         }else
             Q_ASSERT(false);
 
@@ -322,29 +322,29 @@ int Chain::wt144Algo() const
     return std::max(newDifficulty, ProofOfWorkLimit);
 }
 
-int Chain::sword126Algo() const // 16 weighted 126 block groups = 2016 blocks
+int Chain::swordwt126Algo() const // 16 weighted 126 block groups = 2016 blocks // use mtp_6?
 {
-    //qDebug() << "sword126Algo " << QTime::currentTime().toString() << m_height << "@" << m_difficulty;
+    //qDebug() << "swordwt126Algo " << QTime::currentTime().toString() << m_height << "@" << m_difficulty;
     const qint64 targetTimeSpan12 = 12 * 600 * 1000 / 6000; // we aim to be a 6000 times faster than real-time.
     const int ProofOfWorkLimit = 1000;
     if (m_height < 12)
         return ProofOfWorkLimit;
     int newDifficulty = m_difficulty;
     if (m_height % 6 == 0) {//overlapping adjustments based on previous 12 blocks every 6 blocks
-        qDebug() << "sword126Algo " << QTime::currentTime().toString() << m_height << "@" << m_difficulty;
+        qDebug() << "swordwt126Algo " << QTime::currentTime().toString() << m_height << "@" << m_difficulty;
         const int diffmtp_6 = m_blockDifficulties.at(m_blockDifficulties.count() - 7);
         const int diffmtp_12 = m_blockDifficulties.at(m_blockDifficulties.count() - 13);
         const int average2diffs = (diffmtp_6 + diffmtp_12) / 2;
-        const qint64 mtpTip = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7);
-        const qint64 mtpTipMinus12 = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7 - 12);
-        const int64_t mtp6blocks = mtpTip - mtpTipMinus12;
-        newDifficulty = average2diffs * targetTimeSpan12 / mtp6blocks;
+        const qint64 mtp_6 = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7);
+        const qint64 mtp_12 = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7 - 12);
+        const int64_t timespan12 = mtp_6 - mtp_12;
+        newDifficulty = average2diffs * targetTimeSpan12 / timespan12;
         //qDebug() << newDifficulty;
         // take into account fast126 target and slow2016 target
-        const int fasttarget = sword126fastT();
+        const int fasttarget = swordwt126fastT();
         const int fastdifference = fasttarget - newDifficulty;
         const int fastmod = fastdifference >> 1;//1/2;
-        const int slowtarget = m_baseDifficulty;//sword126slowT();//m_blockDiffs_126.at(m_blockDiffs_126.count() - 1);
+        const int slowtarget = m_baseDifficulty;
         const int slowdifference = slowtarget - newDifficulty;
         const int slowmod = slowdifference >> 8;//1/64;
         qDebug() << "target: " << newDifficulty << " fast: " << fasttarget << " slow: " << slowtarget;
@@ -360,14 +360,14 @@ int Chain::sword126Algo() const // 16 weighted 126 block groups = 2016 blocks
     return std::max(newDifficulty, ProofOfWorkLimit);
 }
 
-int Chain::sword126fastT() const // 21 weighted-time 6 block groups = 126 blocks
+int Chain::swordwt126fastT() const // 21 weighted-time 6 block groups = 126 blocks // use mtp_6?
 {
     const qint64 targetTimeSpan21 = 126 * 600 * 1000 / 6000; // we aim to be a 6000 times faster than real-time.
     if (m_height % 6 == 0 && m_height > 125) {
         qint64 timeSpan21 = 0;
         qint64 prior_timestamp = m_blockTimeStamps.at(m_blockTimeStamps.count() - 126 - 13);
         qint64 target_21 = 0;
-        for (int i=0; i<21; i++) {
+        for (int i=1; i<=21; i++) {
             const qint64 target_i = m_blockDifficulties.at(m_blockDifficulties.count() - 126 - 7 + 6 * i);
             const qint64 time_i = m_blockTimeStamps.at(m_blockTimeStamps.count() - 126 - 7 + 6 * i);
             const qint64 d_time = time_i - prior_timestamp;
@@ -383,16 +383,34 @@ int Chain::sword126fastT() const // 21 weighted-time 6 block groups = 126 blocks
         return 0;
 }
 
-int Chain::sword126slowT() const // 16 weighted-time 126 block groups = 2016 blocks
+int Chain::swordcw126fastT() const // 21 constant weight 6 block groups = 126 blocks // use mtp_6?
+{
+    const qint64 targetTimeSpan21 = 126 * 600 * 1000 / 6000; // we aim to be a 6000 times faster than real-time.
+    if (m_height % 6 == 0 && m_height > 125) {
+        const qint64 lasttime_mtp6 = m_blockTimeStamps.at(m_blockTimeStamps.count() - 7);
+        const qint64 lasttime126_mtp12 = m_blockTimeStamps.at(m_blockTimeStamps.count() - 126 - 13);
+        const qint64_t timespan21 = lasttime_mtp6 - lasttime126_mtp12;
+        qint64 target_21 = 0;
+        for (int i=1; i<=21; i++) {
+            const qint64 target_i = m_blockDifficulties.at(m_blockDifficulties.count() - 126 - 7 + 6 * i);
+            target_21 = target_21 + target_i;
+        }
+        target_21 = target_21 / 21;
+        int newDifficulty = target_21 * targetTimeSpan21 / timespan21;
+        return newDifficulty;
+    }else
+        return 0;
+}
+
+int Chain::swordwt126slowT() const // 16 weighted-time 126 block groups = 2016 blocks // use mtp_6?
 {
     const qint64 targetTimeSpan16 = 2016 * 600 * 1000 / 6000; // we aim to be a 6000 times faster than real-time.
     if (m_height % 126 == 0 && m_height > 2015) {
         qint64 timeSpan16 = 0;
         qint64 prior_timestamp = m_blockTimeStamps.at(m_blockTimeStamps.count() - 2016 - 13);
         qint64 target_16 = 0;
-        
-        for (int i=0; i<16; i++) {
-            const qint64 target_i = m_blockDiffs_126.at(m_blockDiffs_126.count() - 16 + i);
+        for (int i=1; i<=16; i++) {
+            const qint64 target_i = m_blockDifficultiescw126.at(m_blockDifficultiescw126.count() - 16 + i);//16x126blocks = 2016
             const qint64 time_i = m_blockTimeStamps.at(m_blockTimeStamps.count() - 2016 - 7 + 126 * i);
             const qint64 d_time = time_i - prior_timestamp;
             prior_timestamp = time_i;

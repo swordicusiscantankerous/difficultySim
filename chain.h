@@ -51,14 +51,15 @@ private:
     int deadalnixAlgo2() const; // the one he announced on the 27th of Oct.
     int cw144Algo() const;
     int wt144Algo() const;
-    int sword126Algo() const;
-    int sword126fastT() const;
-    int sword126slowT() const;
+    int swordwt126Algo() const;
+    int swordwt126fastT() const;
+    int swordcw126fastT() const;
+    int swordwt126slowT() const;
     
     QList<Miner*> m_miners;
     QList<qint64> m_blockTimeStamps;
     QList<int> m_blockDifficulties;  // wt-144
-    QList<int> m_blockDiffs_126; //sword126blocks
+    QList<int> m_blockDifficultiescw126; //sword126blocks
     qint64 m_timeLastPeriodStart;
     qint64 m_pauseStart;
     
