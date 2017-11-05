@@ -26,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent) :
     group->addAction(ui->actionDeadalnix);
     group->addAction(ui->actioncw144);
     group->addAction(ui->actionwt144);
+    group->addAction(ui->actionsword126blocks);
     ui->actionSatoshi->setChecked(true);
 
     m_stats->moveToThread(m_statsThread);
@@ -101,6 +102,10 @@ void MainWindow::algoChanged()
     }else if (ui->actionwt144->isChecked()){
         algo = Chain::wt144;
         ui->label_Algo->setText("wt144 (TomH)");
+    }
+    else if (ui->actionsword126blocks->isChecked()){
+        algo = Chain::sword126blocks;
+        ui->label_Algo->setText(" sword126blocks");
     }
     m_chain.setAdjustmentAlgorithm(algo);
 }

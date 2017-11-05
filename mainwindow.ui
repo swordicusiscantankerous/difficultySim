@@ -147,6 +147,7 @@
      <addaction name="actionDeadalnix"/>
      <addaction name="actiondEDA"/>
      <addaction name="actiondEDAnobaseline"/>
+     <addaction name="actionsword126blocks"/>
     </widget>
     <addaction name="menuOld"/>
     <addaction name="actionSatoshi"/>
@@ -282,6 +283,17 @@
    </property>
    <property name="toolTip">
     <string>Select wt144</string>
+   </property>
+  </action>
+  <action name="actionsword126blocks">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>&amp;sword126blocks </string>
+   </property>
+   <property name="toolTip">
+    <string>Select sword126blocks</string>
    </property>
   </action>
  </widget>
