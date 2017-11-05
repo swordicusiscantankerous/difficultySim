@@ -16,9 +16,11 @@ public:
         DeadalnixOld,
         Neil,
         dEDA,
-        dEDAmodTom,
+        dEDAnobaseline,
         cw144,
-        wt144
+        wt144,
+        wt155log,
+        sword126blocks
     };
     explicit Chain(QObject *parent = nullptr);
 
@@ -29,6 +31,7 @@ public:
 
 signals:
     void difficultyChanged(int newDifficulty);
+    void newMarker();
     void newBlock(int height, qint64 timestamp);
     void hashpowerChanged(int hashPower);
 
@@ -54,7 +57,7 @@ private:
     QList<int> m_blockDifficulties;  // wt-144
     qint64 m_timeLastPeriodStart;
     qint64 m_pauseStart;
-
+    
     int m_difficulty;
     int m_baseDifficulty;
     int m_emergencyCount;

@@ -66,6 +66,13 @@ void GraphWidget::addBlock()
     }
 }
 
+void GraphWidget::addMarker()
+{
+    const qint64 now = QDateTime::currentMSecsSinceEpoch();
+    const qint64 relativeTime = now - m_startTime;
+    m_MarkersGraph.append(QPointF(relativeTime / 500, 1));
+}
+
 void GraphWidget::pause()
 {
     const qint64 now = QDateTime::currentMSecsSinceEpoch();
@@ -96,7 +103,8 @@ void GraphWidget::paintEvent(QPaintEvent *)
     painter.fillRect(0, 0, width(), height(), Qt::white);
     QMatrix matrix;
     matrix.translate(0, height());
-    matrix.scale(0.5 * m_pixelsPerSecond, -height() / 800.);
+    //matrix.scale(0.5 * m_pixelsPerSecond, -height() / 800.);
+    matrix.scale(0.5 * m_pixelsPerSecond, -400. / 800.);
     painter.setRenderHint(QPainter::Antialiasing);
 
     const qint64 now = QDateTime::currentMSecsSinceEpoch();
@@ -143,6 +151,17 @@ void GraphWidget::paintEvent(QPaintEvent *)
             painter.setPen(QPen(QColor(153, 38, 40), 2));
             painter.drawPoints(m2.map(m_blocksFoundGraph));
         }
+        
+        if (!m_MarkersGraph.isEmpty()) {// add markers // 2016, 504 ...126
+            painter.setPen(QPen(Qt::red, 1, Qt::DashDotDotLine));
+            for (int i=0; i<m_MarkersGraph.count(); i++) {//draw markers as vertical dot line
+                //const QPointF a_marker = QPointF(m_MarkersGraph.at(i).x() - relativeTime / 500, 0);
+                const QPointF a_marker = QPointF(m_MarkersGraph.at(i).x(), 0);
+                //painter.drawLine(m2.map(a_marker.x(), 0, a_marker.x(), height()));
+                const QLineF a_markerline = QLineF(a_marker.x(), 0, a_marker.x(), height());
+                painter.drawLine(m2.map(a_markerline));
+            }
+        }
 
         m2 = QMatrix(matrix); // skip the offset in time.
         m2.scale(1, 30);
@@ -154,11 +173,17 @@ void GraphWidget::paintEvent(QPaintEvent *)
 
         const QPointF slowBlock = m2.map(QPointF(0, 60 / 20)); // 20 minutes block
         const QPointF fastBlock = m2.map(QPointF(0, 60 / 5)); // 5 minutes block
+        const QPointF slowslowBlock = m2.map(QPointF(0, 60 / 60)); // 1 hour block
+        const QPointF fastfastBlock = m2.map(QPointF(0, 60 / 2)); // 2 minute block
         painter.drawText(QPoint(10, 5) + slowBlock, "20 min/block");
         painter.drawText(QPoint(10, 5) + fastBlock, "5 min/block");
+        painter.drawText(QPoint(10, 5) + slowslowBlock, "1 hour/block");
+        painter.drawText(QPoint(10, 5) + fastfastBlock, "2 min/block");
         painter.setPen(Qt::gray);
         painter.drawLine(0, slowBlock.y(), 10, slowBlock.y());
         painter.drawLine(0, fastBlock.y(), 10, fastBlock.y());
+        painter.drawLine(0, slowslowBlock.y(), 10, slowslowBlock.y());
+        painter.drawLine(0, fastfastBlock.y(), 10, fastfastBlock.y());
     }
 
     if (!m_difficultyGraph.isEmpty()) {
@@ -178,7 +203,6 @@ void GraphWidget::paintEvent(QPaintEvent *)
         m2.scale(1, 0.5);
         painter.drawPolyline(m2.map(graph));
     }
-
 
     int x = 15;
     painter.setPen(Qt::black);
